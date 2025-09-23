@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>3D ASCII nebula</title>
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            font-family: monospace;
+            color: white;
+        }
+        canvas {
+            background: black;
+            image-rendering: pixelated;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 10px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            max-width: 600px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        .control-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .control-group input[type="range"] {
+            width: 100px;
+        }
+        .control-group input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+        }
+        .control-group span {
+            font-size: 10px;
+            margin-top: 2px;
+            color: #ccc;
+        }
+        button {
+            font-family: monospace;
+            font-size: 14px;
+            padding: 8px 16px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #555;
+        }
+        .palette-controls {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="600" height="600"></canvas>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Petals</label>
+            <input type="range" id="petalsSlider" min="3" max="50" value="20">
+            <span id="petalsValue">20</span>
+        </div>
+        
+        <div class="control-group">
+            <label>Size</label>
+            <input type="range" id="sizeSlider" min="30" max="120" value="70">
+            <span id="sizeValue">70</span>
+        </div>
+        
+        <div class="control-group">
+            <label>Points</label>
+            <input type="range" id="pointsSlider" min="500" max="8000" value="3500">
+            <span id="pointsValue">3500</span>
+        </div>
+        
+        <div class="control-group">
+            <label>Speed</label>
+            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+            <span id="speedValue">1</span>
+        </div>
+        
+        <div class="control-group">
+            <label>Bloom</label>
+            <input type="range" id="bloomSlider" min="0" max="5" step="0.1" value="1">
+            <span id="bloomValue">1</span>
+        </div>
+        
+        <div class="control-group">
+            <label>Scale</label>
+            <input type="range" id="scaleSlider" min="5" max="25" value="14">
+            <span id="scaleValue">14</span>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Color Palette</label>
+            <div class="palette-controls">
+                <input type="color" id="color1" value="#FF4C4C">
+                <input type="color" id="color2" value="#4CFFDB">
+                <input type="color" id="color3" value="#FFD14C">
+                <input type="color" id="color4" value="#4C6BFF">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Presets</label>
+            <button onclick="loadPreset('classic')">Classic</button>
+            <button onclick="loadPreset('neon')">Neon</button>
+            <button onclick="loadPreset('sunset')">Sunset</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Actions</label>
+            <button id="recordBtn">📼 Record GIF</button>
+            <button onclick="randomize()">🎲 Random</button>
+        </div>
+    </div>
+    <script src="gif.js"></script>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const W = 600, H = 600;
+        canvas.width = W;
+        canvas.height = H;
+        ctx.font = "9px monospace";
+        ctx.textBaseline = "top";
+
+        const chars = ['@','#','%','*','+','=','-','.',':',' '];
+        const loopFrames = 240;
+        let t = 0;
+
+        // Customizable parameters
+        let petals = 20;
+        let radius = 70;
+        let pointsCount = 3500;
+        let speed = 1;
+        let bloom = 1;
+        let scale = 14;
+        let palette = ['#FF4C4C', '#4CFFDB', '#FFD14C', '#4C6BFF'];
+
+        // UI Setup
+        function setupUI() {
+            const petalsSlider = document.getElementById('petalsSlider');
+            const sizeSlider = document.getElementById('sizeSlider');
+            const pointsSlider = document.getElementById('pointsSlider');
+            const speedSlider = document.getElementById('speedSlider');
+            const bloomSlider = document.getElementById('bloomSlider');
+            const scaleSlider = document.getElementById('scaleSlider');
+            
+            petalsSlider.oninput = (e) => {
+                petals = parseInt(e.target.value);
+                document.getElementById('petalsValue').textContent = petals;
+            };
+            
+            sizeSlider.oninput = (e) => {
+                radius = parseInt(e.target.value);
+                document.getElementById('sizeValue').textContent = radius;
+            };
+            
+            pointsSlider.oninput = (e) => {
+                pointsCount = parseInt(e.target.value);
+                document.getElementById('pointsValue').textContent = pointsCount;
+            };
+            
+            speedSlider.oninput = (e) => {
+                speed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = speed;
+            };
+            
+            bloomSlider.oninput = (e) => {
+                bloom = parseFloat(e.target.value);
+                document.getElementById('bloomValue').textContent = bloom;
+            };
+            
+            scaleSlider.oninput = (e) => {
+                scale = parseInt(e.target.value);
+                document.getElementById('scaleValue').textContent = scale;
+            };
+            
+            // Color inputs
+            document.getElementById('color1').oninput = (e) => palette[0] = e.target.value;
+            document.getElementById('color2').oninput = (e) => palette[1] = e.target.value;
+            document.getElementById('color3').oninput = (e) => palette[2] = e.target.value;
+            document.getElementById('color4').oninput = (e) => palette[3] = e.target.value;
+        }
+
+        function loadPreset(type) {
+            if (type === 'classic') {
+                palette = ['#FF4C4C', '#4CFFDB', '#FFD14C', '#4C6BFF'];
+            } else if (type === 'neon') {
+                palette = ['#FF0080', '#00FF80', '#8000FF', '#FF8000'];
+            } else if (type === 'sunset') {
+                palette = ['#FF6B35', '#F7931E', '#FFD23F', '#06FFA5'];
+            }
+            
+            // Update color inputs
+            document.getElementById('color1').value = palette[0];
+            document.getElementById('color2').value = palette[1];
+            document.getElementById('color3').value = palette[2];
+            document.getElementById('color4').value = palette[3];
+        }
+
+        function randomize() {
+            petals = Math.floor(Math.random() * 47) + 3;
+            radius = Math.floor(Math.random() * 90) + 30;
+            pointsCount = Math.floor(Math.random() * 7500) + 500;
+            speed = Math.random() * 2.9 + 0.1;
+            bloom = Math.random() * 5;
+            scale = Math.floor(Math.random() * 20) + 5;
+            
+            // Update sliders
+            document.getElementById('petalsSlider').value = petals;
+            document.getElementById('sizeSlider').value = radius;
+            document.getElementById('pointsSlider').value = pointsCount;
+            document.getElementById('speedSlider').value = speed;
+            document.getElementById('bloomSlider').value = bloom;
+            document.getElementById('scaleSlider').value = scale;
+            
+            // Update displays
+            document.getElementById('petalsValue').textContent = petals;
+            document.getElementById('sizeValue').textContent = radius;
+            document.getElementById('pointsValue').textContent = pointsCount;
+            document.getElementById('speedValue').textContent = speed.toFixed(1);
+            document.getElementById('bloomValue').textContent = bloom.toFixed(1);
+            document.getElementById('scaleValue').textContent = scale;
+            
+            // Random colors
+            for (let i = 0; i < 4; i++) {
+                palette[i] = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                document.getElementById(`color${i+1}`).value = palette[i];
+            }
+        }
+
+        function flowerShape(petals, radius, pointsCount) {
+            const points = [];
+            for (let i = 0; i < pointsCount; i++) {
+                const angle = (i / pointsCount) * Math.PI * 2;
+                const r = radius * Math.sin(petals * angle);
+                const jitter = () => (Math.random()-0.5)*bloom; // bloom
+                const x = r * Math.cos(angle) + jitter();
+                const y = r * Math.sin(angle) + jitter();
+                const z = r * Math.cos(angle*1.5) + jitter();
+                points.push({x,y,z});
+            }
+            return points;
+        }
+
+        function project3D(p, angleY) {
+            // Only horizontal rotation (around Y) for perfect loop
+            const x = p.x*Math.cos(angleY)-p.z*Math.sin(angleY);
+            const z = p.x*Math.sin(angleY)+p.z*Math.cos(angleY);
+            const y = p.y;
+            return {
+                x: W/2 + x*scale,
+                y: H/2 + y*scale,
+                z
+            };
+        }
+
+        function drawFrame(frame) {
+            ctx.clearRect(0,0,W,H);
+            const time = (frame/loopFrames)*Math.PI*2*speed;
+            const flower = flowerShape(petals, radius, pointsCount);
+            
+            for(let i=0;i<flower.length;i++){
+                const p = project3D(flower[i], time);
+                const light = 40 + 30*(1 - (p.z/20 + 0.5));
+                const color = palette[i % palette.length];
+                ctx.fillStyle = `hsl(${getHue(color)},100%,${light}%)`;
+                const ch = chars[i % chars.length];
+                ctx.fillText(ch, Math.floor(p.x/9)*9, Math.floor(p.y/9)*9);
+            }
+        }
+
+        function getHue(hex){
+            const r = parseInt(hex.substr(1,2),16)/255;
+            const g = parseInt(hex.substr(3,2),16)/255;
+            const b = parseInt(hex.substr(5,2),16)/255;
+            const max = Math.max(r,g,b), min = Math.min(r,g,b);
+            let h=0;
+            if(max===min) h=0;
+            else if(max===r) h=(60*((g-b)/(max-min))+360)%360;
+            else if(max===g) h=(60*((b-r)/(max-min))+120)%360;
+            else h=(60*((r-g)/(max-min))+240)%360;
+            return h;
+        }
+
+        let recording=false, rendering=false, gif, frameCount=0;
+
+        function captureFrame(){
+            if(recording && gif && !rendering){
+                gif.addFrame(ctx,{copy:true,delay:1000/60});
+                frameCount++;
+                if(frameCount>=loopFrames){
+                    rendering=true;
+                    gif.on("finished", function(blob){
+                        const url=URL.createObjectURL(blob);
+                        const a=document.createElement("a");
+                        a.href=url;
+                        a.download="ascii_nebula_by_bitzo.gif";
+                        a.click();
+                        recording=false;
+                        rendering=false;
+                    });
+                    gif.render();
+                }
+            }
+        }
+
+        document.getElementById("recordBtn").onclick=()=>{
+            if(!recording){
+                gif=new GIF({workers:4,quality:1,width:W,height:H,workerScript:"gif.worker.js"});
+                recording=true;
+                rendering=false;
+                frameCount=0;
+            }
+        };
+
+        function loop(){
+            drawFrame(t);
+            captureFrame();
+            t=(t+1)%loopFrames;
+            requestAnimationFrame(loop);
+        }
+
+        // Initialize UI and start
+        setupUI();
+        loop();
+    </script>
+<p>This was made by <a href="https://github.com/bitzodothtml">bitzodothtml</a></p>
+</body>
+</html>
