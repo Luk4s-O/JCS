@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flavor Wheel — James Croll Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e0e; --bg2:#161616; --bg3:#1e1e1e;
+  --border:#2a2a2a; --border2:#333333;
+  --text:#d4d0c8; --muted:#6b6860; --dim:#4a4845;
+  --accent:#c8a96e; --accent2:#7eb8a0;
+  --mono:'IBM Plex Mono',monospace;
+  --serif:'IBM Plex Serif',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+
+.site-nav{
+  padding:14px 28px;font-size:12px;color:var(--muted);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:0;
+  height:49px;flex-shrink:0;
+}
+.site-nav a{color:var(--muted);text-decoration:none;}
+.site-nav a:hover{color:var(--text);}
+.site-nav .sep{margin:0 8px;color:var(--dim);}
+
+#container{
+  position:relative;
+  width:100vw;
+  height:calc(100vh - 49px);
+  overflow:hidden;
+  cursor:grab;
+  user-select:none;
+}
+#container.panning{cursor:grabbing;}
+
+#wheel-svg{
+  display:block;width:100%;height:100%;
+}
+
+.seg{cursor:pointer;transition:filter 0.12s;}
+.seg:hover{filter:brightness(1.35);}
+.seg.active{filter:brightness(1.5);}
+.seg-label{pointer-events:none;fill:#f0ece0;font-family:'IBM Plex Mono',monospace;}
+
+#popup{
+  position:fixed;right:0;top:49px;
+  width:360px;max-width:92vw;
+  height:calc(100vh - 49px);
+  background:var(--bg2);
+  border-left:1px solid var(--border);
+  overflow-y:auto;
+  transform:translateX(100%);
+  transition:transform 0.22s ease;
+  z-index:200;
+  padding:22px 20px 40px;
+}
+#popup.open{transform:translateX(0);}
+
+#popup-close{
+  position:absolute;top:14px;right:14px;
+  background:none;border:1px solid var(--border);
+  color:var(--muted);font-family:var(--mono);
+  font-size:14px;width:28px;height:28px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:color 0.1s,border-color 0.1s;
+}
+#popup-close:hover{color:var(--text);border-color:var(--text);}
+
+#popup-crumb{
+  font-size:10px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:6px;
+}
+#popup-title{
+  font-size:19px;font-weight:600;
+  color:var(--text);line-height:1.25;
+  margin-bottom:18px;padding-right:32px;
+}
+
+.ps{margin-bottom:18px;}
+.ps-label{
+  font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px;
+}
+.ps-body{
+  font-family:var(--serif);font-size:13.5px;
+  line-height:1.72;color:var(--text);
+}
+.ps-chem{
+  font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);background:var(--bg3);
+  border:1px solid var(--border);
+  padding:10px 12px;line-height:1.8;
+}
+.ps-recipe{
+  font-family:var(--serif);font-size:13px;
+  line-height:1.75;color:var(--text);
+  border-left:2px solid var(--accent);padding-left:12px;
+}
+.ps-src{
+  font-family:var(--mono);font-size:10.5px;
+  line-height:1.8;color:var(--muted);
+  border-top:1px solid var(--border);
+  padding-top:14px;margin-top:4px;
+}
+.ps-src a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--border);}
+.ps-src a:hover{color:var(--muted);border-bottom-color:var(--muted);}
+
+#zoom-btns{
+  position:fixed;left:14px;bottom:22px;
+  display:flex;flex-direction:column;gap:4px;z-index:100;
+}
+.zbtn{
+  width:30px;height:30px;background:var(--bg2);
+  border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.zbtn:hover{border-color:var(--accent);color:var(--accent);}
+
+#hint{
+  position:fixed;left:14px;top:62px;
+  font-size:10px;color:var(--dim);line-height:2;
+  pointer-events:none;z-index:50;
+  letter-spacing:0.04em;
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="https://jamescrollsociety.org">James Croll Society</a>
+  <span class="sep">/</span>
+  Flavor Wheel
+</nav>
+
+<div id="container">
+  <svg id="wheel-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"></svg>
+</div>
+
+<div id="popup">
+  <button id="popup-close">&#215;</button>
+  <div id="popup-crumb"></div>
+  <div id="popup-title"></div>
+  <div id="popup-body"></div>
+</div>
+
+<div id="zoom-btns">
+  <button class="zbtn" id="zin">+</button>
+  <button class="zbtn" id="zout">&#8722;</button>
+  <button class="zbtn" id="zreset" style="font-size:18px">&#8962;</button>
+</div>
+
+<div id="hint">scroll to zoom &middot; drag to pan &middot; click to explore</div>
+
+<script>
+// ─────────────────────────────────────────────
+// WHEEL DATA
+// n=name, d=description, c=color, s=subcategories
+// ch=chemicals, r=recipe  (outer ring / extended middle ring nodes only)
+// ─────────────────────────────────────────────
+const CATS = [
+  // 1 FLORAL (4 leaves)
+  { n:'Floral', c:'#7040A0', d:'Floral aromas originate from terpene compounds formed during cherry development. They are most pronounced in light-roasted high-altitude coffees, particularly from Ethiopia and Kenya, and diminish rapidly with darker roasting.',
+    s:[
+      { n:'Black Tea', d:'The characteristic tannin-floral-astringent impression of black tea. Appears in some light-roasted East African coffees, particularly Ethiopian naturals and Kenyan washed lots.',
+        ch:'Theaflavins, thearubigens, linalool, geraniol, various glycosides',
+        r:'Steep one black tea bag for 30 seconds only in 100 mL hot water. Cool to room temperature. Evaluate the aroma of the liquid before tasting.' },
+      { n:'Floral', d:'Generic floral impression combining rose, jasmine, and chamomile-type aromas. The overarching category for flower-like aromatic notes in coffee.',
+        s:[
+          { n:'Chamomile', d:'Mild, apple-like floral note with slightly sweet, herbaceous character. Gentle and round compared to rose or jasmine.',
+            ch:'Alpha-bisabolol, chamazulene, apigenin glycosides, various sesquiterpenes',
+            r:'Steep one chamomile tea bag for 60 seconds in 100 mL warm water (not boiling). Cool and evaluate aroma.' },
+          { n:'Rose', d:'Classic sweet floral note with slight fruitiness. Strongly associated with premium Ethiopian Yirgacheffe coffees, particularly washed processing.',
+            ch:'Beta-damascenone (key rose impact compound), geraniol, nerol, rose oxide, citronellol, linalool',
+            r:'Add 1 drop of food-grade rose water (not perfume) to 200 mL room-temperature water. Alternatively steep one fresh rose petal in warm water for 2 minutes.' },
+          { n:'Jasmine', d:'Intense, sweet, slightly indolic floral note. Highly characteristic of premium washed Ethiopian coffees. One of the most distinctive positive descriptors in specialty coffee.',
+            ch:'Benzyl acetate (primary), linalool, indole, methyl jasmonate, cis-jasmone, benzyl alcohol',
+            r:'Add 1 drop jasmine absolute (diluted in food-safe carrier oil) to 200 mL water. Alternatively steep one fresh jasmine flower briefly in warm water.' }
+        ]
+      }
+    ]
+  },
+
+  // 2 SWEET (8 leaves)
+  { n:'Sweet', c:'#907020', d:'Sweet descriptors in coffee arise from residual sugars, caramelisation products, and sweet-smelling volatiles formed during roasting. They are most prominent in medium-roasted coffees from Brazil, Colombia, and Central America.',
+    s:[
+      { n:'Vanilla', d:'Sweet, creamy, warm aromatic note. One of the most recognisable and universally positive sweet coffee descriptors.',
+        s:[
+          { n:'Vanilla', d:'The distinct aromatic note of vanilla bean. Formed from vanillin released during roasting of chlorogenic acid derivatives and lignin-related compounds.',
+            ch:'Vanillin (4-hydroxy-3-methoxybenzaldehyde), para-hydroxybenzaldehyde, guaiacol derivatives',
+            r:'Add 1 to 2 drops of pure vanilla extract (not imitation) to 200 mL water.' }
+        ]
+      },
+      { n:'Vanillin', d:'The pure synthetic vanillin impression — slightly sharper and cleaner than natural vanilla with less floral complexity. Found in some dark-roasted coffees.',
+        ch:'Vanillin (pure compound: 4-hydroxy-3-methoxybenzaldehyde)',
+        r:'Dissolve 0.01 g of pure food-grade vanillin powder in 1 L water. Use a very small amount — vanillin is extremely potent above threshold.' },
+      { n:'Overall Sweet', d:'A general impression of sweetness without a specific sweet aroma compound. The holistic sweet sensation perceived primarily through taste.',
+        ch:'Sucrose, fructose, and other residual sugars; sweet-associated volatiles including furaneol',
+        r:'Dissolve 1 g sucrose per 100 mL water for a threshold sweetness reference standard.' },
+      { n:'Sweet Aromatics', d:'A complex combination of sweet-smelling volatile compounds that create a sweet impression without high sugar content. Often found in honey-processed and natural coffees.',
+        ch:'Furaneol (HDMF: 4-hydroxy-2,5-dimethyl-3(2H)-furanone), sotolone, various lactones, linalool',
+        r:'Add 1 drop of food-grade cotton candy or caramel flavouring to 200 mL water. Alternatively: dilute pure maple syrup 1:200 in water.' },
+      { n:'Brown Sugar', d:'Broad category covering concentrated sugar-derived aromas from caramelisation and Maillard reactions.',
+        s:[
+          { n:'Molasses', d:'Dark, heavy, bittersweet sugar note with complex caramelisation and mineral quality. Found in some Brazilian and aged coffees.',
+            ch:'Furfural, 5-hydroxymethylfurfural (HMF), various Maillard products, organic acids, mineral salts',
+            r:'Dissolve 0.5 g blackstrap molasses in 100 mL warm water. Evaluate aroma — taste is optional.' },
+          { n:'Maple Syrup', d:'Distinctive sweet, woody, slightly floral note from the compound sotolon. Appears in some honey-processed and naturally dried coffees.',
+            ch:'Sotolon (3-hydroxy-4,5-dimethyl-2(5H)-furanone, the primary maple compound), various lactones, cyclotene',
+            r:'Dilute pure maple syrup (not pancake syrup) 1:100 in water. Must be authentic maple — sotolon is the diagnostic compound.' },
+          { n:'Caramelized', d:'Toffee, burnt sugar, or butterscotch note from sugar pyrolysis during roasting. Very common and often desirable in medium roasts.',
+            ch:'Diacetyl (buttery note), 2,3-pentanedione, furanones, 5-HMF, 4-methylcatechol, various caramel compounds',
+            r:'Carefully dry-caramelise 5 g sugar in a clean pan until amber but not dark brown. Dissolve in 200 mL warm water and cool.' },
+          { n:'Honey', d:'Floral, complex sweet aromatic note of honey. More complex than sucrose sweetness due to enzymatic and floral compounds.',
+            ch:'Various phenolics, linalool, hotrienol, norisoprenoids, various organic acids, glucose oxidase byproducts',
+            r:'Dissolve 0.5 g raw wildflower honey in 100 mL warm water. Must be raw, unfiltered honey — pasteurised honey loses most of the volatile aromatics.' }
+        ]
+      }
+    ]
+  },
+
+  // 3 NUTTY/COCOA (5 leaves)
+  { n:'Nutty/Cocoa', c:'#784520', d:'Nut and cocoa descriptors arise from pyrazines and other nitrogen-containing compounds formed during roasting. They are characteristic of medium-roasted coffees from Brazil, Colombia, and lower-altitude origins.',
+    s:[
+      { n:'Cocoa', d:'Cocoa and chocolate notes arising from complex mixtures of pyrazines, theobromine, and roasting-derived volatiles.',
+        s:[
+          { n:'Chocolate', d:'Sweet, mild milk-chocolate character with cocoa notes. Very common and widely regarded as positive in medium-roasted coffees.',
+            ch:'2-Phenylethanol, various alkylpyrazines, theobromine, linalool, vanillin, furaneol',
+            r:'Dissolve 1 g unsweetened cocoa powder (not hot chocolate mix) in 100 mL warm water with no added sugar. Evaluate aroma while warm.' },
+          { n:'Dark Chocolate', d:'Bitter, more intense cocoa note with less sweetness and higher phenolic character. Found in medium-dark roasts and some Robusta-influenced blends.',
+            ch:'Theobromine, caffeine, various polyphenols, roasted pyrazines, catechins, reduced furaneol relative to milk chocolate',
+            r:'Dissolve a small piece (1 to 2 g) of 85% or higher dark chocolate in 100 mL warm water. Allow to cool before evaluating.' }
+        ]
+      },
+      { n:'Nutty', d:'Roasted nut notes formed from alkylpyrazines and sulphur-containing compounds produced during the Maillard reaction in roasting.',
+        s:[
+          { n:'Peanuts', d:'Roasted peanut aroma, slightly oily and pyrazine-heavy. Common in medium-roasted commodity-grade coffees and some Brazilian naturals.',
+            ch:'2,5-Dimethylpyrazine, 2,6-dimethylpyrazine, various alkylpyrazines, hexanal, 2-acetylpyrazine',
+            r:'Steep 3 to 4 roasted unsalted peanuts (not flavoured) in 100 mL warm water for 5 minutes. Cool and evaluate.' },
+          { n:'Hazelnut', d:'Sweet, rich, roasted nut note. More aromatic and less oily than peanut. Often considered a premium nutty descriptor in specialty coffee.',
+            ch:'Filbertone (5-methylhept-2-en-4-one — the diagnostic hazelnut compound), various pyrazines, linalool, acetoin',
+            r:'Steep 3 to 4 roasted hazelnuts (skin on, unsalted) in 100 mL warm water for 5 minutes. Filbertone is the key aroma threshold compound.' },
+          { n:'Almond', d:'Delicate, slightly sweet nut note with mild marzipan quality. Found in some washed Central American coffees, particularly from Guatemala and Honduras.',
+            ch:'Benzaldehyde (primary marzipan note), benzyl alcohol, various organic aldehydes, amygdalin breakdown products',
+            r:'Add 1 to 2 drops of pure almond extract to 200 mL water. Alternatively steep 4 to 5 raw almonds in 100 mL warm water for 10 minutes.' }
+        ]
+      }
+    ]
+  },
+
+  // 4 ROASTED (7 leaves)
+  { n:'Roasted', c:'#6A2800', d:'Roasted descriptors arise from pyrolysis reactions during roasting that degrade sugars, amino acids, and chlorogenic acids into aromatic and bitter compounds. Their intensity increases with roast degree.',
+    s:[
+      { n:'Pipe Tobacco', d:'Sweet, aromatic, aged tobacco character with vanillin and wood notes. Considered a positive complex aromatic in well-developed dark roasts.',
+        ch:'Furfuryl mercaptan (2-furanmethanethiol), various pyrazines, vanillin, coumarin, tobacco-specific nitrosamines at trace level',
+        r:'Steep a small amount of unflavoured pipe tobacco in room-temperature water for 2 minutes. Evaluate by smell only — do not consume.' },
+      { n:'Tobacco', d:'More general dried tobacco note, drier and less sweet than pipe tobacco. Associated with medium-dark roasts and some Robusta-influenced coffees.',
+        ch:'Pyridine, nicotinic acid, various pyrazines, furfural, 2-acetylfuran, beta-damascenone',
+        r:'Steep a small amount of plain tobacco (no additives) in warm water briefly. Smell reference only — evaluate the aroma card approach if possible.' },
+      { n:'Burnt', d:'Overheating-derived harsh aromatic notes from excessive pyrolysis of organic compounds during roasting.',
+        s:[
+          { n:'Acrid', d:'Sharp, harsh, burning chemical note from acrolein and other carbonyl compounds. Associated with over-roasting or scorching of coffee.',
+            ch:'Acrolein (propenal, CH₂=CH-CHO), furfural, acetaldehyde, various furans and pyrazines from over-roasting',
+            r:'Lightly char a small piece of plain bread until very dark but not fully carbonised. Steep in hot water for 1 minute. Cool and evaluate the aroma.' },
+          { n:'Ashy', d:'Cool ash or wet cigarette ash character indicating over-roasting or residual processing char in green beans.',
+            ch:'Phenol, cresols (methylphenols), guaiacol, various phenolics from lignin pyrolysis',
+            r:'Suspend a small amount of clean wood ash (from untreated wood only) in 100 mL water. Let settle for 5 minutes. Evaluate the aroma of the slightly discoloured supernatant.' },
+          { n:'Smoky', d:'Wood smoke or campfire character. Found in some dark roasts and in certain coffees processed over wood fires in producing countries.',
+            ch:'Guaiacol (primary smoke compound), 4-vinylguaiacol, syringol, catechol, furfural, various phenolics',
+            r:'Add 1 drop of food-grade liquid smoke (hickory or applewood) to 500 mL water. This is a highly concentrated reference — dilute well.' }
+        ]
+      },
+      { n:'Cereal', d:'Grain and malt notes arising from starch and protein degradation during early roasting stages before full development.',
+        s:[
+          { n:'Grain', d:'Raw cereal, fresh grain, or toasted grain note. Characteristic of under-developed light roasts or coffees with high starch content from immature cherries.',
+            ch:'(E)-2-Nonenal, hexanal, various Strecker aldehydes, 2-acetylpyrazine, 6-methyl-5-hepten-2-one',
+            r:'Steep 1 tablespoon raw barley or wheat grain (unroasted, not malted) in 100 mL warm water for 5 minutes. Cool and evaluate.' },
+          { n:'Malt', d:'Sweet, toasted grain character with slight caramel. Like malted barley or wort. Found in medium roasts and some naturals.',
+            ch:'Dimethyl sulfide, acetaldehyde, 2-acetyl-1-pyrroline, maltol, various Maillard-derived carbonyl compounds',
+            r:'Steep 1 tablespoon pale brewing malt (malted barley, crushed) in 100 mL warm water for 3 minutes. Cool and evaluate — compare to the grain reference.' }
+        ]
+      }
+    ]
+  },
+
+  // 5 SPICES (6 leaves)
+  { n:'Spices', c:'#8A4800', d:'Spice descriptors arise from terpene and phenylpropanoid compounds present in coffee or formed during roasting. They are found in some Indonesian, Indian, and naturally processed coffees.',
+    s:[
+      { n:'Pungent', d:'Sharp, piercing sensory quality that stimulates the trigeminal nerve. A general category for intense, nose-prickling aromatic sensations.',
+        ch:'Piperine and related alkaloids, allicin, isothiocyanates, capsaicin-type compounds at trace level',
+        r:'Add 1 small piece of fresh ginger to 100 mL warm water, steep 2 minutes. Alternatively: 1 drop of horseradish juice in 100 mL water.' },
+      { n:'Pepper', d:'Specifically the spicy-aromatic note of black pepper. Appears in some Robusta-influenced coffees and in aged or dry-processed beans.',
+        ch:'Rotundone (the primary pepper aroma compound), piperine (pungency), beta-caryophyllene, limonene, sabinene',
+        r:'Crack 2 to 3 black peppercorns, steep in 100 mL warm water for 3 minutes. Rotundone is detectable at very low threshold — some people are anosmic to it.' },
+      { n:'Brown Spice', d:'Warm, complex spice aromatics from phenylpropanoid compounds. The class includes anise, cinnamon, clove, and nutmeg character.',
+        s:[
+          { n:'Anise', d:'Sweet licorice-like aromatic from anethole. Appears in some Indonesian coffees and as a roasting artifact in certain cultivars.',
+            ch:'Trans-anethole (primary compound, ~90% of anise oil), estragole, fenchone, limonene',
+            r:'Steep 3 to 4 star anise seeds in 100 mL warm water for 4 minutes. Trans-anethole is the diagnostic compound — it has a very low aroma threshold.' },
+          { n:'Nutmeg', d:'Warm, slightly sweet spice with aromatic complexity from myristicin and other terpenoids. Found in some Indonesian and aged coffees.',
+            ch:'Myristicin (primary), safrole, elemicin, eugenol, borneol, sabinene, alpha-pinene',
+            r:'Grate a small amount of fresh nutmeg into 100 mL warm water, steep 3 minutes. Pre-ground nutmeg loses volatiles rapidly — use fresh whole nutmeg for calibration.' },
+          { n:'Cinnamon', d:'Sweet, warm spice note from cinnamaldehyde. One of the most commonly recognised positive spice descriptors in coffee.',
+            ch:'Trans-cinnamaldehyde (primary — ~65-80% of cinnamon bark oil), eugenol, linalool, coumarin (in Cassia-type)',
+            r:'Steep a 1 cm piece of Ceylon cinnamon stick (not Cassia) in 100 mL warm water for 5 minutes. Ceylon has more delicate cinnamaldehyde character; Cassia is more coumarin-heavy.' },
+          { n:'Clove', d:'Intense, medicinal-sweet spice note from eugenol. Can appear in some Indonesian coffees, particularly Sumatra and Sulawesi.',
+            ch:'Eugenol (primary compound, 70-90% of clove bud oil), acetyl eugenol, beta-caryophyllene, methyl salicylate',
+            r:'Steep 1 to 2 whole cloves in 100 mL warm water for 4 minutes. This is very intense — eugenol has a low threshold. Dilute further if the reference is overwhelming.' }
+        ]
+      }
+    ]
+  },
+
+  // 6 GREEN/VEGETATIVE (10 leaves)
+  { n:'Green/Vegetative', c:'#2A6828', d:'Green and vegetative descriptors arise from lipid-derived aldehydes, sulphur compounds, and chlorophyll-related compounds. They are often negative in roasted coffee and suggest under-development, defect, or contamination.',
+    s:[
+      { n:'Olive Oil', d:'Smooth, slightly bitter, fatty aromatic reminiscent of fresh extra-virgin olive oil. A rare positive green note occasionally found in some washed coffees.',
+        ch:'Hexanal, (E)-2-hexenal, nonanal, oleocanthal (bitterness), oleacein, various C6 aldehydes',
+        r:'Add 1 drop of fresh extra-virgin olive oil to 200 mL warm water, shake vigorously to emulsify. Evaluate immediately — olive oil volatiles dissipate quickly.' },
+      { n:'Raw', d:'Unprocessed, green, starchy character without defined aroma. Like un-roasted coffee or raw grain. Indicates under-roasting.',
+        ch:'Hexanal (dominant), 1-hexanol, C6 fatty acid volatiles, raw starch-derived compounds, chlorogenic acids',
+        r:'Add 1 small piece of raw green (unroasted) coffee bean to 100 mL cool water, steep 10 minutes. This is the reference for the raw green coffee aroma benchmark.' },
+      { n:'Green/Vegetative', d:'The broad class of green, leafy, or unripe vegetable aromas. Almost always considered a defect in roasted coffee.',
+        s:[
+          { n:'Under-ripe', d:'Harsh, green, unripe fruit character. Found in coffees processed from immature cherries harvested before full sugar development.',
+            ch:'Hexanal, (E)-2-hexenal, methyl hexanoate, 2-isobutyl-3-methoxypyrazine, high chlorogenic acid levels',
+            r:'Add 1 to 2 drops of juice from an unripe (green) tomato or green capsicum to 100 mL water. These contain the same C6 aldehyde green note compounds.' },
+          { n:'Peapod', d:'Fresh green vegetable note similar to raw snap peas or edamame. Occasionally appears in very lightly roasted specialty coffees.',
+            ch:'(E)-2-Hexenal, hexanal, 1-pyrroline, 2-acetyl-1-pyrroline (at very low levels, can give positive pea note)',
+            r:'Steep 1 fresh snow pea pod or a few edamame in 100 mL warm water for 5 minutes. Evaluate both by smell and compare to very light roast coffee.' },
+          { n:'Fresh', d:'Clean, bright, generically green aromatic quality — the freshness impression of green vegetation without a specific vegetable.',
+            ch:'Hexanal, cis-3-hexen-1-ol (leaf alcohol), (E)-2-hexenal, cis-3-hexenyl acetate — collectively called the "green leaf volatiles"',
+            r:'Crush a small amount of fresh grass or torn green herb leaf in 100 mL cold water. The cis-3-hexen-1-ol (leaf alcohol) is the diagnostic compound — also found in fresh green tea.' },
+          { n:'Dark Green', d:'Deeper, more intense green vegetative note. Like cooked spinach or dark leafy greens. More sulfurous than bright green notes.',
+            ch:'Dimethyl sulfide (DMS), methional, (E)-2-hexenal, various sulphur-containing volatiles from amino acid degradation',
+            r:'Lightly blanch a few spinach leaves in water, steep in 100 mL water for 3 minutes, cool. Compare to the fresh reference — the DMS addition makes it "darker".' },
+          { n:'Vegetative', d:'General cooked or raw vegetable character including cabbage, cauliflower, or broccoli notes. Almost always a defect in roasted coffee.',
+            ch:'Dimethyl sulfide, methyl mercaptan, dimethyl disulphide, various glucosinolate breakdown products (in brassicas)',
+            r:'Add 0.5 mL of the water remaining from cooking cauliflower to 100 mL fresh water. Evaluate the aroma — DMS is the diagnostic compound.' },
+          { n:'Hay-like', d:'Dry, grassy, baled hay character. Associated with aged or poorly stored coffees where volatile aromatics have been replaced by lipid oxidation products.',
+            ch:'(Z)-3-Hexenyl acetate, coumarin, various lactones, cis-3-hexen-1-ol, dried-grass volatiles from lipid degradation',
+            r:'Steep a small amount of dried chamomile flowers or dried meadow hay in cool water for 5 minutes. Coumarin is the characteristic compound of fresh hay.' },
+          { n:'Herb-like', d:'Fresh or dried herb note including rosemary, thyme, or sage character. Found in some coffees grown alongside herbs or in certain terroir-influenced lots.',
+            ch:'Linalool, limonene, thymol, carvacrol, borneol, various monoterpenes shared between coffee and herbs',
+            r:'Steep a small piece of fresh rosemary or thyme in 100 mL warm water for 3 minutes. Compare with a linalool reference if available.' }
+        ]
+      },
+      { n:'Beany', d:'Raw, legume-like character reminiscent of raw beans or fresh soybeans. Almost always a defect indicating over-fermentation or green coffee handling problems.',
+        ch:'n-Hexanal (dominant C6 aldehyde), various aldehydes from lipid oxidation, raw starch volatiles, 2-isobutyl-3-methoxypyrazine',
+        r:'Steep 3 to 4 raw (unroasted, uncooked) green coffee beans in cool water for 10 minutes, 1:50 ratio. This is the direct reference for the beany defect aroma.' }
+    ]
+  },
+
+  // 7 SOUR/FERMENTED (10 leaves)
+  { n:'Sour/Fermented', c:'#606A00', d:'Sour and fermented descriptors arise from organic acids and fermentation metabolites. At appropriate levels they contribute complexity and brightness; at excessive levels they indicate processing defects.',
+    s:[
+      { n:'Sour', d:'The class of clean and defect sourness arising from organic acids formed during cherry fermentation and coffee processing.',
+        s:[
+          { n:'Sour Aromatics', d:'General sour aromatic impression combining acidity and fermentation notes. A complex sensory impression rather than a single compound.',
+            ch:'Acetic acid, lactic acid, citric acid, malic acid, formic acid — combination of fermentation-derived organic acids',
+            r:'Mix 0.1 mL glacial acetic acid plus 0.05 mL lactic acid in 1 L water for a balanced sour aromatic reference. Evaluate aroma primarily.' },
+          { n:'Acetic Acid', d:'Vinegar-like sharp, pungent sourness. At low levels adds brightness and complexity; at high levels indicates over-fermentation processing defect.',
+            ch:'Acetic acid (CH₃COOH, ethanoic acid) — primary compound, produced by acetobacter bacteria during fermentation',
+            r:'Dilute food-grade white vinegar (5% acetic acid) 1:50 in water for a gentle reference. WCR standard: 0.1 mL glacial acetic acid per 1 L water.' },
+          { n:'Butyric Acid', d:'Rancid, vomit-like odour at high concentrations; mildly cheesy at very low concentrations. Almost always indicates a fermentation defect in coffee.',
+            ch:'n-Butanoic acid (butyric acid, CH₃CH₂CH₂COOH), produced by Clostridium bacteria during anaerobic over-fermentation',
+            r:'WCR standard: 0.5 mL of a 0.1% butyric acid solution in 100 mL water. Use extreme caution — this is an unpleasant reference. Evaluate by brief smell only.' },
+          { n:'Isovaleric Acid', d:'Sour, cheesy, sweaty, rancid odour. Indicates fermentation defects or improper drying. Sometimes described as "fermented" or "rotten" character.',
+            ch:'3-Methylbutanoic acid (isovaleric acid, (CH₃)₂CHCH₂COOH), produced by certain bacteria and yeast during over-fermentation',
+            r:'WCR standard: 0.5 mL of a 0.05% isovaleric acid solution in 100 mL water. Evaluate by very brief smell only — this is an unpleasant defect reference.' },
+          { n:'Citric Acid', d:'Clean, bright, refreshing sourness associated with unripe citrus. The dominant organic acid in many high-quality washed coffees from East Africa.',
+            ch:'Citric acid (2-hydroxypropane-1,2,3-tricarboxylic acid) — naturally present in coffee at levels depending on variety, altitude, and processing',
+            r:'Dissolve 0.15 g food-grade citric acid in 1 L water. This produces approximately the citric acid contribution of a well-acidic washed Ethiopian coffee.' },
+          { n:'Malic Acid', d:'Softer, smoother sourness with apple-like character. Found in many specialty coffees, particularly from high-altitude origins. Considered more elegant than citric acid sourness.',
+            ch:'Malic acid (2-hydroxybutanedioic acid) — found naturally in coffee, prominent in some Colombian, Guatemalan, and Ethiopian coffees',
+            r:'Dissolve 0.12 g food-grade malic acid in 1 L water. Compare directly with the citric acid reference to perceive the qualitative difference.' }
+        ]
+      },
+      { n:'Alcohol/Fermented', d:'Complex fermented character with alcoholic, winey, or over-ripe quality. Can be positive (wine-like complexity) or negative (defect).',
+        s:[
+          { n:'Winey', d:'Complex fermented grape character combining fruit, alcohol, and mild acidity. Strongly associated with naturally processed Ethiopian and Yemeni coffees.',
+            ch:'Ethanol, ethyl acetate, various higher alcohols (isoamyl alcohol, 2-phenylethanol), lactic acid, 2,3-butanediol',
+            r:'Add 0.5 mL dry red wine to 100 mL water. Very dilute — the goal is a wine-like aroma note, not the taste of wine.' },
+          { n:'Whiskey', d:'Spirit-like character with woody, vanillin, and fermented notes. Rare descriptor; sometimes appears in barrel-aged or experimental process coffees.',
+            ch:'Ethanol, acetaldehyde, furfural, vanillin, guaiacol, various wood-derived congeners (lactones, tannins), ethyl esters',
+            r:'Add 0.3 mL of a peated Scotch whisky to 150 mL water. The guaiacol and vanillin from wood contact are the diagnostic compounds.' },
+          { n:'Fermented', d:'Complex fermentation character including sour, fruity, and slightly funky notes. Can be positive as mild complexity or negative as over-fermented defect.',
+            ch:'Ethyl acetate, various organic acids, isoamyl alcohol, isoamyl acetate (banana ester), diacetyl, 2,3-butanediol',
+            r:'Dilute natural kombucha 1:10 in water, or use 1 mL unfiltered apple cider vinegar per 100 mL water. This captures the mixed organic acid and ester character.' },
+          { n:'Overripe', d:'Heavy, slightly musty fruit character suggesting over-fermentation or cherries harvested well past optimal ripeness. Usually considered a defect.',
+            ch:'Ethyl acetate (dominant), butyric acid, isovaleric acid, higher alcohols, enzymatic breakdown products from over-ripe fruit',
+            r:'Allow fresh fruit juice (apple or grape) to ferment slightly at room temperature for 24 to 36 hours, then dilute 1:30 in water. Evaluate the aroma of the over-fermented juice note.' }
+        ]
+      }
+    ]
+  },
+
+  // 8 FRUITY (18 leaves)
+  { n:'Fruity', c:'#881818', d:'Fruity descriptors are among the most complex and valued in specialty coffee. They arise from volatile esters, terpenes, and organic acids produced during cherry development and influenced by processing method. Ethiopian and Kenyan coffees are most associated with fruity character.',
+    s:[
+      { n:'Berry', d:'The class of fresh berry aromas, from light strawberry to dark blackberry. Most prominent in naturally processed and honey-processed coffees.',
+        s:[
+          { n:'Blackberry', d:'Ripe, dark berry flavour combining sweetness with subtle tartness. Associated with high-quality Central American washed and some naturally processed East African coffees.',
+            ch:'Furaneol (HDMF), linalool, methyl anthranilate, ethyl hexanoate, various C6 esters from berry fermentation',
+            r:'Crush 2 to 3 fresh or thawed frozen blackberries in 100 mL room-temperature water, strain through paper filter, add 2 to 3 drops of the strained juice to 100 mL fresh water.' },
+          { n:'Raspberry', d:'Bright, tart berry with distinctive fresh red fruit character. Often found in light-roasted Ethiopian and Kenyan coffees with high citric acid.',
+            ch:'Beta-ionone, diacetyl, furaneol, raspberry ketone (4-(4-hydroxyphenyl)-2-butanone — the diagnostic compound), various C6 esters',
+            r:'Dilute fresh raspberry juice 1:15 in water, or add 1 to 2 drops of raspberry extract to 100 mL water. The raspberry ketone threshold is around 1 ppb in water.' },
+          { n:'Blueberry', d:'Sweet, mild berry note with slight earthiness. Strongly associated with naturally processed Ethiopian coffees, particularly from Sidama and Guji.',
+            ch:'Linalool, furaneol, nerol, cis-3-hexen-1-ol, various anthocyanins (in the berry itself), 2,5-dimethyl-4-methoxy-3(2H)-furanone',
+            r:'Dilute fresh blueberry juice 1:20 in water. WCR reference: 0.5 mL blueberry extract per 100 mL water. Compare with naturally processed Ethiopian coffee.' },
+          { n:'Strawberry', d:'Sweet, slightly floral berry note. Appears in some naturally processed coffees. Less common than blackberry or blueberry in specialty coffee.',
+            ch:'Furaneol (HDMF — dominant strawberry compound), methyl anthranilate, various esters including ethyl butanoate, 4-hydroxy-2,5-dimethyl-3(2H)-furanone',
+            r:'Add 2 drops of natural strawberry extract to 200 mL water. Alternatively: dilute fresh strawberry juice 1:10 in water. Furaneol alone can serve as a strawberry reference.' }
+        ]
+      },
+      { n:'Dried Fruit', d:'Concentrated, fermented fruit notes characteristic of dried or concentrated fruit. Found in naturally processed and aged coffees.',
+        s:[
+          { n:'Raisin', d:'Concentrated sweet grape character with mild fermentation notes and slight tannin. Found in aged or naturally processed coffees from Yemen and Ethiopia.',
+            ch:'Furfuryl alcohol, acetic acid, various Maillard products from natural drying, phenylacetic acid, concentrated grape sugars',
+            r:'Steep 3 to 4 large raisins in 100 mL hot water for 5 minutes, cool. Use the strained liquid at 1:10 further dilution in fresh water.' },
+          { n:'Prune', d:'Sweet, dark fruit with slight fermented character. Heavy, concentrated dried fruit note. Found in some aged and dark-roasted coffees.',
+            ch:'Benzaldehyde, furfural, malic acid, chlorogenic acid degradation products, various organic acids from controlled drying',
+            r:'Dilute prune juice (unsweetened) 1:25 in water. Alternatively steep 1 dried prune in 100 mL hot water for 5 minutes.' }
+        ]
+      },
+      { n:'Other Fruit', d:'A broad category covering tropical, stone, and pome fruits other than citrus and berries.',
+        s:[
+          { n:'Coconut', d:'Sweet, fatty, tropical note with mild vanillin character. Appears in some Indonesian, Philippine, and island-grown coffees.',
+            ch:'Delta-decalactone (primary coconut compound), gamma-nonalactone, methyl laurate, various medium-chain fatty acid esters',
+            r:'Add 2 to 3 drops of natural coconut extract to 100 mL water. Alternatively use unsweetened coconut water diluted 1:5.' },
+          { n:'Cherry', d:'Sweet-tart stone fruit character. Both dark cherry and bright cherry variants appear in coffee, reflecting the coffee cherry itself.',
+            ch:'Benzaldehyde (primary cherry impact compound), linalool, furaneol, trans-2-hexenal, various esters',
+            r:'WCR reference: 1 drop of cherry extract in 100 mL water. Alternatively dilute fresh tart cherry juice 1:12 in water. Black cherry and bright cherry are perceptually different.' },
+          { n:'Pomegranate', d:'Complex tart-sweet flavour with distinct astringency and brightness. Found in some East African coffees with very high citric and malic acid.',
+            ch:'Punicalagins (unique ellagitannins), ellagic acid, anthocyanins, malic acid, citric acid, punicalin',
+            r:'Dilute pure pomegranate juice 1:20 in water. The distinctive tannin-acid combination is the reference note.' },
+          { n:'Pineapple', d:'Bright tropical acidity with sweet ester-rich character. Found in some Central American and East African coffees with high ester content.',
+            ch:'Ethyl butanoate, methyl hexanoate, allyl hexanoate, furaneol, 2,5-dimethyl-4-hydroxy-3(2H)-furanone',
+            r:'Dilute fresh pineapple juice 1:12 in water. Not canned — tinned pineapple is cooked and loses the key ethyl butanoate ester character.' },
+          { n:'Grape', d:'Sweet, vinous fruit character with slight fermentation. Can appear in naturally processed coffees with wine-adjacent aromatics.',
+            ch:'Methyl anthranilate (Concord grape-type), linalool, geraniol, various esters, tartaric acid',
+            r:'Dilute white grape juice 1:12 in water for a neutral grape reference. For a more Concord-type reference use Concord or Welch-style grape juice at 1:20.' },
+          { n:'Apple', d:'Fresh, crisp fruit note with characteristic malic acid character. Found in some washed coffees with high malic acid from high-altitude origins.',
+            ch:'Ethyl 2-methylbutyrate, hexyl acetate, alpha-farnesene, malic acid, 2-methylbutyrate esters',
+            r:'Dilute fresh apple juice 1:10 in water. Alternatively add 2 drops of apple extract to 100 mL water. Green apple (Granny Smith) best represents the malic acid reference.' },
+          { n:'Peach', d:'Sweet stone fruit with distinctive lactonic character. Appears in some washed and honey-processed coffees, particularly from Colombia and Panama.',
+            ch:'Gamma-decalactone (the diagnostic peach lactone), benzaldehyde, linalool, various C10 esters, persicol',
+            r:'Add 1 to 2 drops of natural peach extract to 200 mL water. WCR: 0.3 mL peach extract per 150 mL water. Gamma-decalactone alone is a valid single-compound reference.' },
+          { n:'Pear', d:'Delicate, sweet fruit note with characteristic isoamyl acetate and pear ester character. Subtle and easily masked in coffee.',
+            ch:'Ethyl decadienoate (the primary pear ester), isoamyl acetate (also banana-associated), trans-2,cis-4-decadienoic acid ethyl ester',
+            r:'Dilute fresh pear juice 1:12 in water. Alternatively use 1 drop of isoamyl acetate solution in 200 mL water, though this tends more toward banana than pear.' }
+        ]
+      },
+      { n:'Citrus Fruit', d:'Bright, fresh citrus aromatics from terpene and aldehyde compounds. Common in light-roasted East African coffees, particularly Ethiopian and Kenyan.',
+        s:[
+          { n:'Grapefruit', d:'Bitter-sweet citrus with distinctive nootkatone character and naringenin bitterness. Found in some Ethiopian and Kenyan coffees.',
+            ch:'Nootkatone (the diagnostic grapefruit sesquiterpene), limonene, naringenin (bitterness), bergapten, decanal',
+            r:'Add 1 drop cold-pressed grapefruit essential oil to 300 mL water. Alternatively steep a 2 cm strip of fresh grapefruit peel in warm water for 2 minutes.' },
+          { n:'Orange', d:'Sweet, bright citrus note. The most approachable citrus descriptor. Common in medium-light roasted coffees from Ethiopia, Colombia, and Brazil.',
+            ch:'Limonene (dominant, ~90% of orange peel oil), linalool, valencene, decanal, various esters',
+            r:'Add 1 drop cold-pressed orange essential oil to 300 mL water. Alternatively steep fresh orange zest in warm water for 2 minutes. Valencene is the cultivar-specific compound.' },
+          { n:'Lemon', d:'Bright, fresh citrus with sharp tartness. Often indicates citric acid dominance. Common in East African washed coffees, particularly Ethiopian Yirgacheffe.',
+            ch:'Limonene, citral (geranial + neral — the key lemon aldehyde), citronellal, gamma-terpinene',
+            r:'Add 1 drop cold-pressed lemon essential oil to 300 mL water. Alternatively dilute fresh lemon juice 1:25 in water. Citral is the diagnostic compound — pure citral solution works well.' },
+          { n:'Lime', d:'More aromatic and sharper than lemon with distinctive terpene character. Appears in some Central and South American coffees and in some East African washed lots.',
+            ch:'Limonene, alpha-terpinene, gamma-terpinene, citral (lower ratio than lemon), terpinen-4-ol, bergapten',
+            r:'Add 1 drop cold-pressed lime essential oil to 300 mL water. Alternatively dilute fresh lime juice 1:30 in water. Compare directly with lemon to perceive the different terpene character.' }
+        ]
+      }
+    ]
+  },
+
+  // 9 OTHER (16 leaves)
+  { n:'Other', c:'#484440', d:'The Other category covers papery, musty, earthy, and chemical descriptors that are almost exclusively negative in roasted coffee. They indicate defects in green bean processing, storage, or roasting.',
+    s:[
+      { n:'Papery/Musty', d:'A broad category of stale, aged, or contaminated aromatic notes indicating storage defects, moisture damage, or microbial contamination.',
+        s:[
+          { n:'Stale', d:'Flat, oxidised character of old or poorly stored coffee. Loss of positive volatile aromatics replaced by lipid oxidation products.',
+            ch:'Trans-2-nonenal, various oxidised lipid products (aldehydes, ketones from linoleic acid oxidation), loss of volatile esters',
+            r:'Leave brewed coffee open at room temperature for 24 to 48 hours. The resulting aroma is the stale reference. Alternatively compare fresh vs. 6-month-old roasted coffee.' },
+          { n:'Cardboard', d:'Flat, papery, slightly musty note. Strongly associated with packaging defects, rancid coffee oils, or oxidised coffees stored in paper bags.',
+            ch:'Trans-2-nonenal (2-nonenal — the primary cardboard compound, formed from linoleic acid oxidation), various alkenal compounds',
+            r:'Steep a clean piece of unprinted corrugated cardboard in 100 mL warm water for 3 minutes. WCR standard: trans-2-nonenal solution at approximately 0.1 µg/L.' },
+          { n:'Papery', d:'Clean paper-pulp note without the musty element. Associated with unbleached paper filters or packaging contact.',
+            ch:'Various lipid oxidation products, lignin-derived compounds, furfural, aldehydes from cellulose degradation',
+            r:'Rinse and steep an unbleached (brown) paper coffee filter in 100 mL warm water for 2 minutes. Compare with the pre-rinsed filter to understand why pre-rinsing filters is standard practice.' },
+          { n:'Woody', d:'Dry, tree-bark or lignin-like character. Indicates old crop coffee, improper storage, or certain low-altitude origins.',
+            ch:'Guaiacol, 4-vinylguaiacol, vanillin, eugenol, syringol, various phenolics derived from lignin degradation',
+            r:'Steep a small piece of untreated raw wood (a plain wooden chopstick or raw wood shaving) in 100 mL warm water for 5 minutes. Not treated, painted, or lacquered wood.' },
+          { n:'Moldy/Damp', d:'Wet, musty, mould-like note. Indicates moisture damage or fungal contamination during storage or drying.',
+            ch:'1-Octen-3-ol (the dominant mushroom and mould note), 1-octen-3-one, geosmin, various fungal metabolites (mycotoxins at trace level)',
+            r:'Add 1 to 2 drops of 1-octen-3-ol solution to 100 mL water. Alternatively: use a small amount of water in which fresh mushrooms have been briefly steeped.' },
+          { n:'Musty/Dusty', d:'Dry, fine-particle, stale dust-like note. Like old books or a dusty room. Indicates improper storage conditions.',
+            ch:'Geosmin (trans-1,10-dimethyl-trans-9-decalol), 2-methylisoborneol, fenchone, various terpenoids from bacteria/mould',
+            r:'Add a very small pinch of dry garden soil to 100 mL water, stir, let settle 5 minutes, use the slightly discoloured supernatant. Geosmin is the primary earthy-dusty compound.' },
+          { n:'Musty/Earthy', d:'Wet soil, petrichor-like character combined with mustiness. Indicates past moisture damage and microbial activity during drying.',
+            ch:'Geosmin (primary compound, produced by Streptomyces actinobacteria), 2-methylisoborneol, petrichor compounds from actinomycetes',
+            r:'Dampen a small clean pebble or handful of garden soil, then place in 100 mL water. Geosmin has an extremely low threshold (~5 ng/L in water) — use very small amounts.' },
+          { n:'Animalic', d:'Animal-like, barnyard, zoo, or leather character. Indicates contamination from green bean handling or certain fermentation bacteria.',
+            ch:'Indole, skatole (3-methylindole), various sulfur compounds, p-cresol, dimethyl trisulfide',
+            r:'WCR reference: a very dilute skatole (3-methylindole) solution is the standard. Alternatively: very briefly smell a small piece of aged cheese rind from the rind-only portion.' },
+          { n:'Meaty/Brothy', d:'Savory, umami-like, meat stock character. Usually indicates processing defects or certain Maillard reaction pathways from amino acid imbalances.',
+            ch:'Various Strecker aldehydes (methional, phenylalanine-derived), methional, pyrazines at high levels, 2-furfurylthiol breakdown products',
+            r:'Add 1 mL very dilute beef or chicken stock (1:100 stock in water) to 100 mL water. The target is a savory, brothy aroma impression, not an obvious meat smell.' },
+          { n:'Phenolic', d:'Medicinal, smoky, plastic-like character. Indicates contamination from phenolic compounds in processing water or certain microbial activity.',
+            ch:'4-Chlorophenol (medicinal note), guaiacol, 4-vinylguaiacol, phenol, 2,6-dichlorophenol',
+            r:'Add a very small drop of liquid smoke (1 drop per 500 mL) to water for a guaiacol reference. For the medicinal phenol note: brief smell of a diluted iodine solution from a safe distance.' }
+        ]
+      },
+      { n:'Chemical', d:'Chemical-type descriptors including primary taste sensations perceived as defect, and harsh aromatic compounds from contamination.',
+        s:[
+          { n:'Bitter', d:'A primary taste quality. Clean caffeine bitterness is normal and expected in coffee; harsh or lingering bitterness indicates defect compounds from over-roasting or contamination.',
+            ch:'Caffeine (primary), chlorogenic acid lactones, various Maillard products, kahweol, cafestol diterpenes',
+            r:'Dissolve 0.08 g pure caffeine in 1 L water (approximately 80 mg/L — near typical espresso-level caffeine in diluted form). Evaluate the pure bitter taste without other flavour interference.' },
+          { n:'Salty', d:'Primary taste quality. Rarely appropriate in coffee at perceptible levels; may indicate mineral imbalance in brew water or certain unusual processing.',
+            ch:'Sodium chloride (NaCl), potassium chloride (KCl), calcium chloride, mineral salts generally',
+            r:'Dissolve 0.3 g table salt in 1 L water (300 mg/L NaCl — sub-threshold for most people as saltiness but noticeable as flavour modification). Evaluate how salt affects the overall taste perception.' },
+          { n:'Medicinal', d:'Pharmaceutical, antiseptic, or iodine-like note. Indicates contamination from phenolic compounds in processing water, chlorinated water, or certain microbial byproducts.',
+            ch:'4-Chlorophenol, 2-chlorophenol, guaiacol, various halogenated phenols from chlorinated water reaction with plant phenolics',
+            r:'Add a very small amount (1 drop per 2 L) of diluted iodine solution or use a faint chlorine reference (swimming pool water diluted 1:100) for the medicinal antiseptic note.' },
+          { n:'Petroleum', d:'Fuel, kerosene, or mineral oil character. Indicates contamination from storage equipment, roasting machinery oils, or jute bag taint.',
+            ch:'Various alkanes, toluene, xylene, naphthalene, petroleum-derived volatile organic compounds',
+            r:'This reference should be evaluated from a sealed container at a distance — not directly inhaled. A very small piece of petroleum jelly on a cotton pad placed near (not in) the sample jar.' },
+          { n:'Skunky', d:'Pungent, sulfurous, skunk-like or light-struck character. Rare in coffee but can indicate specific sulfur compound development from light exposure or certain processing conditions.',
+            ch:'3-Methyl-2-butene-1-thiol (MBT — the primary skunk compound and light-struck beer compound), various polyfunctional thiols',
+            r:'This is typically evaluated using reference standard kits. MBT is present at very low concentrations in light-struck beer — a briefly light-exposed light lager can serve as an approximate reference.' },
+          { n:'Rubber', d:'Synthetic rubber, tire-like, or latex character. Indicates contamination from rubber processing equipment, certain hessian bag taints, or rubber tree proximity in some growing regions.',
+            ch:'Styrene, 2-acetylpyridine, benzothiazole, various volatile rubber degradation products, isoprene oligomers',
+            r:'Briefly steep a small piece of natural latex rubber (a clean rubber band, not synthetic) in warm water for 1 minute. Evaluate the water by smell only — not for consumption.' }
+        ]
+      }
+    ]
+  }
+];
+
+let centerNode = null;
+
+// CENTER NODE — shown when user clicks the centre circle
+const CENTER_NODE = {
+  n: 'SCA Coffee Taster\'s Flavor Wheel',
+  d: 'The SCA/WCR Coffee Taster\'s Flavor Wheel (2016) is the global standard reference for describing coffee flavour. It organises ~110 sensory descriptors across three rings: 9 broad categories (inner ring), mid-level groupings (middle ring), and 84 specific leaf descriptors (outer ring). The wheel is read from centre outward — broader families inward, specific notes outward. To use it: brew your coffee, let it cool to about 70 °C, and nose it first. Identify the broad family from the inner ring, then narrow toward the outer ring. Taste to confirm. Not every descriptor need appear — the wheel is a vocabulary, not a checklist.',
+};
+
+// ─────────────────────────────────────────────
+// GEOMETRY UTILITIES
+// ─────────────────────────────────────────────
+const CX = 500, CY = 500;
+const R = [72, 172, 298, 492]; // [center, inner ring end, middle ring end, outer ring end]
+const GAP = 0.014; // radians of gap between segments
+
+function countLeaves(node) {
+  if (!node.s || node.s.length === 0) return 1;
+  return node.s.reduce((acc, c) => acc + countLeaves(c), 0);
+}
+
+function arcPath(cx, cy, r1, r2, sa, ea) {
+  const s = sa + GAP, e = ea - GAP;
+  if (e <= s) return '';
+  const cos = Math.cos, sin = Math.sin;
+  const x1=cx+r1*cos(s), y1=cy+r1*sin(s);
+  const x2=cx+r2*cos(s), y2=cy+r2*sin(s);
+  const x3=cx+r2*cos(e), y3=cy+r2*sin(e);
+  const x4=cx+r1*cos(e), y4=cy+r1*sin(e);
+  const lg = (e-s) > Math.PI ? 1 : 0;
+  return `M${x1},${y1}L${x2},${y2}A${r2},${r2},0,${lg},1,${x3},${y3}L${x4},${y4}A${r1},${r1},0,${lg},0,${x1},${y1}Z`;
+}
+
+function tint(hex, factor) {
+  let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  const cl = x => Math.round(Math.max(0,Math.min(255,x)));
+  if (factor > 0) {
+    r=cl(r+(255-r)*factor); g=cl(g+(255-g)*factor); b=cl(b+(255-b)*factor);
+  } else {
+    const f = 1+factor;
+    r=cl(r*f); g=cl(g*f); b=cl(b*f);
+  }
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function getLevelColor(catColor, level) {
+  if (level===0) return tint(catColor,-0.35);
+  if (level===1) return catColor;
+  return tint(catColor,0.3);
+}
+
+// ─────────────────────────────────────────────
+// RENDERING
+// ─────────────────────────────────────────────
+const svg = document.getElementById('wheel-svg');
+const group = document.createElementNS('http://www.w3.org/2000/svg','g');
+group.id = 'wheel-group';
+svg.appendChild(group);
+
+const nodeMap = new Map();
+const splitRanges = [];
+
+function renderNode(node, level, sa, ea, catColor, breadcrumb) {
+  const hasChildren = node.s && node.s.length > 0;
+  const rIn = R[level];
+  const rOut = hasChildren ? R[level+1] : R[R.length-1];
+
+  const d = arcPath(CX, CY, rIn, rOut, sa, ea);
+  if (!d) return;
+
+  const fill = getLevelColor(catColor, level);
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', fill);
+  path.setAttribute('stroke', '#0e0e0e');
+  path.setAttribute('stroke-width', '0.5');
+  path.classList.add('seg');
+
+  nodeMap.set(path, {
+    node, level,
+    catColor,
+    breadcrumb: breadcrumb ? breadcrumb + ' / ' + node.n : node.n,
+    isLeaf: !hasChildren,
+    isExtended: !hasChildren && level < 2
+  });
+
+  group.appendChild(path);
+
+  // Track which level-1 nodes have children — R[2] separator only drawn over these
+  if (level === 1 && hasChildren) splitRanges.push([sa, ea]);
+
+  // ── Radial label rendering ─────────────────
+  const midA = (sa + ea) / 2;
+  const normA = ((midA % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  const flip = normA > Math.PI/2 && normA < Math.PI*3/2;
+
+  const midR2  = (rIn + rOut) / 2;
+  const arcWidth    = (ea - sa) * midR2;   // tangential span
+  const radialDepth = rOut - rIn;           // radial span (= text length limit)
+
+  // Font size: fill ≤65% of arc width, capped per level
+  const maxFS = level === 0 ? 15 : level === 1 ? 13 : 10.5;
+  const fontSize = Math.min(arcWidth * 0.65, maxFS);
+  const charW = fontSize * 0.60;
+  const maxChars = Math.floor((radialDepth - 10) / charW);
+
+  // Helper: find best split point near the middle
+  function bestSplit(str) {
+    const mid = Math.floor(str.length / 2);
+    let best = -1, bestD = Infinity;
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === ' ' || str[i] === '/' || str[i] === '-') {
+        const d = Math.abs(i - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+    }
+    if (best < 0) return null;
+    const sep = str[best];
+    if (sep === '/' || sep === '-') return [str.slice(0, best+1), str.slice(best+1)];
+    return [str.slice(0, best), str.slice(best+1)];
+  }
+
+  const rawLabel = node.n;
+  if (arcWidth >= 9 && fontSize >= 5 && maxChars >= 2) {
+    const margin = 6;
+    const textR = flip ? rOut - margin : rIn + margin;
+    const tx0 = CX + textR * Math.cos(midA);
+    const ty0 = CY + textR * Math.sin(midA);
+    const rot = midA * 180/Math.PI + (flip ? 180 : 0);
+
+    let lines;
+    if (rawLabel.length <= maxChars) {
+      lines = [rawLabel];
+    } else {
+      const parts = bestSplit(rawLabel);
+      if (parts && parts[0].length <= maxChars && parts[1].length <= maxChars) {
+        lines = parts;
+      } else {
+        // Single truncated line
+        lines = [rawLabel.slice(0, Math.max(1, maxChars - 1)) + '\u2026'];
+      }
+    }
+
+    // For two lines: offset each ±0.55 × fontSize in the tangential direction
+    // Tangential direction ⊥ to radius = [-sin(midA), cos(midA)]
+    const tOff = lines.length === 2 ? fontSize * 0.55 : 0;
+    const strokeW = fontSize > 9 ? 2.6 : 1.8;
+
+    lines.forEach((line, li) => {
+      const sign = li === 0 ? 1 : -1;
+      const tx = tx0 + sign * tOff * (-Math.sin(midA));
+      const ty = ty0 + sign * tOff * ( Math.cos(midA));
+
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', tx);
+      txt.setAttribute('y', ty);
+      txt.setAttribute('text-anchor', 'start');
+      txt.setAttribute('dominant-baseline', 'central');
+      txt.setAttribute('font-size', fontSize);
+      txt.setAttribute('font-family', "'IBM Plex Mono',monospace");
+      txt.setAttribute('font-weight', '700');
+      txt.setAttribute('fill', '#f5f2ec');
+      txt.setAttribute('stroke', '#000000');
+      txt.setAttribute('stroke-width', strokeW);
+      txt.setAttribute('paint-order', 'stroke');
+      txt.setAttribute('stroke-linejoin', 'round');
+      txt.setAttribute('transform', `rotate(${rot},${tx},${ty})`);
+      txt.setAttribute('pointer-events', 'none');
+      txt.textContent = line;
+      group.appendChild(txt);
+    });
+  }
+
+  // Recurse
+  if (hasChildren && level < R.length - 2) {
+    const total = countLeaves(node);
+    let cur = sa;
+    for (const child of node.s) {
+      const leaves = countLeaves(child);
+      const span = (ea - sa) * leaves / total;
+      renderNode(child, level+1, cur, cur+span, catColor,
+        breadcrumb ? breadcrumb + ' / ' + node.n : node.n);
+      cur += span;
+    }
+  }
+}
+
+function buildWheel() {
+  // Clear previous render
+  while (group.firstChild) group.removeChild(group.firstChild);
+  nodeMap.clear();
+  centerNode = null;
+  splitRanges.length = 0;
+
+  // Center clickable circle
+  const center = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  center.setAttribute('cx', CX); center.setAttribute('cy', CY);
+  center.setAttribute('r', R[0]-1);
+  center.setAttribute('fill','#1c1c1c');
+  center.setAttribute('stroke','#3a3a3a');
+  center.setAttribute('stroke-width','1');
+  center.style.cursor = 'pointer';
+  centerNode = center;
+  group.appendChild(center);
+
+  const cLines = [
+    {t:'SCA',      y:-19, size:9.5, w:'400', fill:'#5a5652'},
+    {t:'FLAVOR',   y: -5, size:13,  w:'600', fill:'#9a948a'},
+    {t:'WHEEL',    y: 10, size:13,  w:'600', fill:'#9a948a'},
+    {t:'↗ click',  y: 24, size:7,   w:'400', fill:'#44413e'},
+  ];
+  cLines.forEach(l => {
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',CX); t.setAttribute('y',CY+l.y);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('dominant-baseline','central');
+    t.setAttribute('font-size',l.size);
+    t.setAttribute('font-family',"'IBM Plex Mono',monospace");
+    t.setAttribute('font-weight',l.w);
+    t.setAttribute('fill',l.fill);
+    t.setAttribute('pointer-events','none');
+    t.textContent = l.t;
+    group.appendChild(t);
+  });
+
+  const total = CATS.reduce((s,c)=>s+countLeaves(c),0);
+  let cur = -Math.PI/2;
+  for (const cat of CATS) {
+    const leaves = countLeaves(cat);
+    const span = (leaves/total)*2*Math.PI;
+    renderNode(cat, 0, cur, cur+span, cat.c, '');
+    cur += span;
+  }
+
+  // Outer ring border and thick inner ring divider
+  [{r:R[3],w:2},{r:R[1],w:4}].forEach(({r,w}) => {
+    const sep = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    sep.setAttribute('cx', CX); sep.setAttribute('cy', CY); sep.setAttribute('r', r);
+    sep.setAttribute('fill','none'); sep.setAttribute('stroke','#0e0e0e');
+    sep.setAttribute('stroke-width',w); sep.setAttribute('pointer-events','none');
+    group.appendChild(sep);
+  });
+
+  // R[2] separator drawn ONLY over ranges where a mid-ring node has children
+  // (those tiles are visually split into two bands, which is correct).
+  // Where a mid-ring leaf spans all the way to R[3], no separator is drawn.
+  const cos = Math.cos, sin = Math.sin;
+  splitRanges.forEach(([sa, ea]) => {
+    const s = sa + GAP, e = ea - GAP;
+    if (e <= s) return;
+    const lg = (e - s) > Math.PI ? 1 : 0;
+    const r = R[2];
+    const px1 = CX + r*cos(s), py1 = CY + r*sin(s);
+    const px2 = CX + r*cos(e), py2 = CY + r*sin(e);
+    const arcD = `M${px1},${py1}A${r},${r},0,${lg},1,${px2},${py2}`;
+    const arc = document.createElementNS('http://www.w3.org/2000/svg','path');
+    arc.setAttribute('d', arcD);
+    arc.setAttribute('fill','none');
+    arc.setAttribute('stroke','#0e0e0e');
+    arc.setAttribute('stroke-width','2.5');
+    arc.setAttribute('pointer-events','none');
+    group.appendChild(arc);
+  });
+}
+
+buildWheel();
+
+// ─────────────────────────────────────────────
+// POPUP
+// ─────────────────────────────────────────────
+const popup = document.getElementById('popup');
+const popupClose = document.getElementById('popup-close');
+const popupTitle = document.getElementById('popup-title');
+const popupCrumb = document.getElementById('popup-crumb');
+const popupBody = document.getElementById('popup-body');
+
+function addSection(label, content, style) {
+  const div = document.createElement('div');
+  div.className = 'ps';
+  const lbl = document.createElement('div');
+  lbl.className = 'ps-label';
+  lbl.textContent = label;
+  div.appendChild(lbl);
+  const body = document.createElement('div');
+  body.className = style === 'chem' ? 'ps-chem' : style === 'recipe' ? 'ps-recipe' : 'ps-body';
+  body.textContent = content;
+  div.appendChild(body);
+  popupBody.appendChild(div);
+}
+
+function addSource(isLeaf) {
+  const div = document.createElement('div');
+  div.className = 'ps';
+  const lbl = document.createElement('div');
+  lbl.className = 'ps-label';
+  lbl.textContent = 'Sources';
+  div.appendChild(lbl);
+  const body = document.createElement('div');
+  body.className = 'ps-src';
+  if (isLeaf) {
+    body.innerHTML =
+      '[1] World Coffee Research. <em>WCR Sensory Lexicon</em>, 2nd Ed. (2017). ' +
+      '<a href="https://worldcoffeeresearch.org/resources/sensory-lexicon" target="_blank">worldcoffeeresearch.org</a> ' +
+      '— primary source for descriptors, reference preparations, and concentration standards.<br>' +
+      '[2] Flament, I. <em>Coffee Flavor Chemistry</em>. Wiley (2002). ISBN 978-0-471-72038-6 ' +
+      '— identification of diagnostic chemical compounds.<br>' +
+      '[3] Specialty Coffee Association / WCR. <em>Coffee Taster\'s Flavor Wheel</em> (2016). ' +
+      '<a href="https://sca.coffee/research/coffee-tasters-flavor-wheel" target="_blank">sca.coffee</a> ' +
+      '— descriptor taxonomy and wheel structure.';
+  } else {
+    body.innerHTML =
+      '[1] Specialty Coffee Association / WCR. <em>Coffee Taster\'s Flavor Wheel</em> (2016). ' +
+      '<a href="https://sca.coffee/research/coffee-tasters-flavor-wheel" target="_blank">sca.coffee</a>.<br>' +
+      '[2] World Coffee Research. <em>WCR Sensory Lexicon</em>, 2nd Ed. (2017). ' +
+      '<a href="https://worldcoffeeresearch.org/resources/sensory-lexicon" target="_blank">worldcoffeeresearch.org</a>.';
+  }
+  div.appendChild(body);
+  popupBody.appendChild(div);
+}
+
+function showCenterPopup() {
+  popupTitle.textContent = CENTER_NODE.n;
+  popupTitle.style.color = '#a0998e';
+  popupCrumb.textContent = 'SCA / WCR 2016';
+  popupBody.innerHTML = '';
+  addSection('About this wheel', CENTER_NODE.d, 'body');
+  addSource(false);
+  popup.classList.add('open');
+}
+
+function showPopup(data) {
+  const {node, level, breadcrumb, catColor} = data;
+  popupTitle.textContent = node.n;
+  popupTitle.style.color = tint(catColor, 0.35);
+  popupCrumb.textContent = breadcrumb || node.n;
+  popupBody.innerHTML = '';
+  addSection('Description', node.d, 'body');
+  if (node.ch) addSection('Key chemical compounds', node.ch, 'chem');
+  if (node.r)  addSection('Calibration reference', node.r, 'recipe');
+  addSource(!!(node.ch));
+  popup.classList.add('open');
+}
+
+function closePopup() {
+  popup.classList.remove('open');
+  document.querySelectorAll('.seg.active').forEach(s=>s.classList.remove('active'));
+}
+
+popupClose.addEventListener('click', closePopup);
+
+// ─────────────────────────────────────────────
+// PAN / ZOOM
+// ─────────────────────────────────────────────
+const container = document.getElementById('container');
+let vx=0, vy=0, vw=1000, vh=1000;
+
+function applyVB() {
+  svg.setAttribute('viewBox',`${vx} ${vy} ${vw} ${vh}`);
+}
+
+function toSVG(e) {
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: vx + (e.clientX - rect.left) / rect.width * vw,
+    y: vy + (e.clientY - rect.top) / rect.height * vh
+  };
+}
+
+function zoomAt(svgX, svgY, factor) {
+  const newVW = Math.max(200, Math.min(3000, vw/factor));
+  const newVH = Math.max(200, Math.min(3000, vh/factor));
+  const f = newVW/vw;
+  vx = svgX - (svgX - vx) * f;
+  vy = svgY - (svgY - vy) * f;
+  vw = newVW; vh = newVH;
+  applyVB();
+}
+
+applyVB();
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const pt = toSVG(e);
+  zoomAt(pt.x, pt.y, e.deltaY < 0 ? 1.15 : 0.87);
+}, {passive:false});
+
+let dragging=false, downX, downY, dragX, dragY;
+
+svg.addEventListener('mousedown', e => {
+  dragging = true;
+  downX = dragX = e.clientX;
+  downY = dragY = e.clientY;
+  container.classList.add('panning');
+});
+
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const rect = svg.getBoundingClientRect();
+  vx -= (e.clientX - dragX) / rect.width * vw;
+  vy -= (e.clientY - dragY) / rect.height * vh;
+  dragX = e.clientX;
+  dragY = e.clientY;
+  applyVB();
+});
+
+window.addEventListener('mouseup', e => {
+  if (!dragging) return;
+  const moved = Math.abs(e.clientX-downX) + Math.abs(e.clientY-downY) < 5;
+  if (moved) {
+    const el = e.target;
+    if (el === centerNode) {
+      document.querySelectorAll('.seg.active').forEach(s=>s.classList.remove('active'));
+      showCenterPopup();
+    } else if (el.classList.contains('seg')) {
+      const data = nodeMap.get(el);
+      if (data) {
+        document.querySelectorAll('.seg.active').forEach(s=>s.classList.remove('active'));
+        el.classList.add('active');
+        showPopup(data);
+      } else {
+        closePopup();
+      }
+    } else if (!popup.contains(el)) {
+      closePopup();
+    }
+  }
+  dragging = false;
+  container.classList.remove('panning');
+});
+
+// Touch support
+let lastTouchDist = null, lastTouchX, lastTouchY;
+
+svg.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    lastTouchDist = Math.sqrt(dx*dx+dy*dy);
+  } else if (e.touches.length === 1) {
+    lastTouchX = e.touches[0].clientX;
+    lastTouchY = e.touches[0].clientY;
+  }
+}, {passive:false});
+
+svg.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    const mx = (e.touches[0].clientX + e.touches[1].clientX)/2;
+    const my = (e.touches[0].clientY + e.touches[1].clientY)/2;
+    const pt = toSVG({clientX:mx, clientY:my});
+    if (lastTouchDist) zoomAt(pt.x, pt.y, dist/lastTouchDist);
+    lastTouchDist = dist;
+  } else if (e.touches.length === 1) {
+    const rect = svg.getBoundingClientRect();
+    vx -= (e.touches[0].clientX - lastTouchX)/rect.width*vw;
+    vy -= (e.touches[0].clientY - lastTouchY)/rect.height*vh;
+    lastTouchX = e.touches[0].clientX;
+    lastTouchY = e.touches[0].clientY;
+    applyVB();
+  }
+}, {passive:false});
+
+svg.addEventListener('touchend', e => { lastTouchDist = null; });
+
+// Zoom buttons
+document.getElementById('zin').addEventListener('click', ()=>zoomAt(500,500,1.3));
+document.getElementById('zout').addEventListener('click', ()=>zoomAt(500,500,0.77));
+document.getElementById('zreset').addEventListener('click', ()=>{
+  vx=0;vy=0;vw=1000;vh=1000;applyVB();
+});
+</script>
+</body>
+</html>
