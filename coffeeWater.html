@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Mineralisation — James Croll Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0e0e0e;
+    --bg2:      #161616;
+    --bg3:      #1e1e1e;
+    --border:   #2a2a2a;
+    --border2:  #333333;
+    --text:     #d4d0c8;
+    --muted:    #6b6860;
+    --dim:      #4a4845;
+    --accent:   #c8a96e;
+    --accent2:  #7eb8a0;
+    --accent3:  #a08cb4;
+    --warn:     #c87a4a;
+    --ca:       #7eb8d4;
+    --mg:       #7eb8a0;
+    --na:       #c8a96e;
+    --k:        #b49ec8;
+    --mono:     'IBM Plex Mono', monospace;
+    --serif:    'IBM Plex Serif', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 28px 120px;
+  }
+
+  /* ---- HEADER ---- */
+  .site-nav {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 56px;
+    letter-spacing: 0.03em;
+  }
+  .site-nav a { color: var(--muted); text-decoration: none; }
+  .site-nav a:hover { color: var(--text); }
+  .site-nav .sep { margin: 0 8px; color: var(--dim); }
+
+  .doc-header { margin-bottom: 52px; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+
+  .doc-header h1 {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .doc-header .subtitle {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .doc-header .subtitle span { color: var(--dim); margin: 0 6px; }
+
+  /* ---- TOC ---- */
+  .toc {
+    margin: 0 0 52px;
+    padding: 20px 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+  }
+
+  .toc-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    padding: 0;
+  }
+
+  .toc li {
+    counter-increment: toc;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 2;
+    color: var(--muted);
+  }
+
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero) ".";
+    color: var(--dim);
+    margin-right: 10px;
+    font-size: 11px;
+  }
+
+  .toc a { color: var(--text); text-decoration: none; opacity: 0.7; transition: opacity 0.15s; }
+  .toc a:hover { opacity: 1; color: var(--accent); }
+
+  /* ---- SECTIONS ---- */
+  section { margin-bottom: 64px; }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  h2 .section-num {
+    color: var(--dim);
+    font-weight: 400;
+    font-size: 11px;
+  }
+
+  h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 28px 0 10px;
+  }
+
+  p {
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+  a:hover { border-bottom-color: var(--accent); }
+
+  /* ---- CALLOUTS ---- */
+  .note {
+    background: var(--bg2);
+    border-left: 2px solid var(--accent2);
+    padding: 12px 16px;
+    margin: 18px 0;
+    font-size: 13.5px;
+    color: var(--muted);
+    font-family: var(--serif);
+    line-height: 1.65;
+  }
+
+  .warn {
+    background: var(--bg2);
+    border-left: 2px solid var(--warn);
+    padding: 12px 16px;
+    margin: 18px 0;
+    font-size: 13.5px;
+    color: var(--muted);
+    font-family: var(--serif);
+    line-height: 1.65;
+  }
+
+  .warn strong, .note strong { color: var(--text); }
+
+  /* ---- FORMULA BLOCK ---- */
+  .formula {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  /* ---- TABLES ---- */
+  .table-wrap { overflow-x: auto; margin: 16px 0 28px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    min-width: 520px;
+  }
+
+  th {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 7px 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  tr:nth-child(even) td { background: var(--bg2); }
+
+  tr.lotus td { background: rgba(200, 169, 110, 0.07); }
+  tr.lotus td:first-child { border-left: 2px solid var(--accent); }
+
+  tr.brew td { background: rgba(126, 184, 160, 0.06); }
+  tr.brew td:first-child { border-left: 2px solid var(--accent2); }
+
+  tr.natural td { background: rgba(160, 140, 180, 0.07); }
+  tr.natural td:first-child { border-left: 2px solid var(--accent3); }
+
+  .ca { color: var(--ca); }
+  .mg { color: var(--mg); }
+  .na { color: var(--na); }
+  .k  { color: var(--k);  }
+
+  /* ---- RECIPE BLOCKS ---- */
+  .recipe {
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    padding: 22px 24px;
+    margin: 16px 0 28px;
+  }
+
+  .recipe-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .recipe-meta .tag {
+    color: var(--text);
+    opacity: 0.6;
+  }
+
+  .drop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .drop-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .drop-cell .n {
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .drop-cell .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .drop-cell.skip { opacity: 0.2; }
+
+  .recipe-stats {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 2;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+
+  .recipe-stats .val { color: var(--text); }
+
+  /* ---- CONVERSION TABLE INLINE ---- */
+  .conversion-grid {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 0;
+    margin: 16px 0;
+    border: 1px solid var(--border2);
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+
+  .cg-head {
+    background: var(--bg3);
+    padding: 7px 14px;
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .cg-cell {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .cg-cell:nth-child(3n+1) { border-right: 1px solid var(--border); }
+  .cg-cell:nth-child(3n+2) { border-right: 1px solid var(--border); }
+
+  /* ---- FOOTER ---- */
+  .doc-footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 2;
+  }
+
+  .doc-footer a { color: var(--dim); border-bottom: 1px solid var(--border); }
+  .doc-footer a:hover { color: var(--muted); }
+
+  /* ---- SMALL HELPERS ---- */
+  .small { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+  .mono { font-family: var(--mono); }
+  strong { color: var(--text); font-weight: 500; }
+  em { font-style: italic; color: var(--muted); }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .legend-item::before {
+    content: "■ ";
+    font-size: 9px;
+  }
+
+  .legend-item.lotus { color: var(--accent); }
+  .legend-item.brew  { color: var(--accent2); }
+  .legend-item.natural { color: var(--accent3); }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    body { padding: 36px 16px 80px; }
+    .drop-grid { grid-template-columns: repeat(2, 1fr); }
+    h2 { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="https://jamescrollsociety.org">James Croll Society</a>
+  <span class="sep">/</span>
+  Water Mineralisation
+</nav>
+
+<header class="doc-header">
+  <h1>Coffee Water Mineralisation</h1>
+  <div class="subtitle">
+    DIY Lotus-equivalent mineral stocks from lab-grade reagents
+    <span>|</span>
+    Source water: 1 µS/cm demineralised
+    <span>|</span>
+    Bratislava, SK
+    <span>|</span>
+    v2
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#s1">Glossary</a></li>
+    <li><a href="#s2">Why water chemistry matters for coffee</a></li>
+    <li><a href="#s3">Understanding ppm — two different things, same abbreviation</a></li>
+    <li><a href="#s4">Where the Lotus calibration values come from</a></li>
+    <li><a href="#s5">What each mineral does in the cup</a></li>
+    <li><a href="#s6">Resources (Bratislava)</a></li>
+    <li><a href="#s7">Reagents — what you have and why</a></li>
+    <li><a href="#s8">Preparing the four mother stocks</a></li>
+    <li><a href="#s9">Handling and storage</a></li>
+    <li><a href="#s10">Reference recipes</a></li>
+    <li><a href="#s11">Table 1 — GH and KH per drop at 20 water volumes</a></li>
+    <li><a href="#s12">Table 2 — Actual TDS per drop at 20 water volumes</a></li>
+    <li><a href="#s13">Table 3 — Minimum water volume for each TDS target (10–200 mg/L)</a></li>
+    <li><a href="#s14">Using your TDS meter as a consistency check</a></li>
+  </ol>
+</nav>
+
+<!-- SECTION 1 -->
+<section id="s1">
+  <h2><span class="section-num">01</span> Glossary</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td><strong>TDS</strong></td><td>Total Dissolved Solids. The sum of all mineral ions dissolved in water, in mg/L. Approximated by a conductivity pen meter.</td></tr>
+    <tr><td><strong>GH</strong></td><td>General Hardness. Concentration of Ca²⁺ and Mg²⁺ ions. Expressed in ppm as CaCO₃ in coffee literature. Also called total hardness.</td></tr>
+    <tr><td><strong>KH</strong></td><td>Carbonate Hardness, also called alkalinity. Concentration of HCO₃⁻ ions. Determines how well water resists pH change (its buffering capacity).</td></tr>
+    <tr><td><strong>ppm</strong></td><td>Parts per million. In water chemistry, 1 ppm = 1 mg/L. Two different ppm scales exist in coffee water literature — see Section 3.</td></tr>
+    <tr><td><strong>ppm as CaCO₃</strong></td><td>A measurement convention where all ions are mathematically converted to an equivalent mass of calcium carbonate, regardless of what the actual ions are. Used by Lotus, Scott Rao, and the SCA.</td></tr>
+    <tr><td><strong>mg/L actual</strong></td><td>The real mass of a specific ion per litre of water, without conversion. This is what a TDS meter approximates.</td></tr>
+    <tr><td><strong>Mother stock</strong></td><td>A concentrated mineral solution prepared in advance. A small number of drops are added to brew water at the time of brewing.</td></tr>
+    <tr><td><strong>Drop</strong></td><td>One drop from a standard glass bulb pipette = 0.05 mL (20 drops per mL). Must be verified for your specific dropper before first use.</td></tr>
+    <tr><td><strong>p.a.</strong></td><td>Pro analysi — analytical-grade reagent purity. Superior to food-grade in consistency. Appropriate for this application.</td></tr>
+    <tr><td><strong>CAS number</strong></td><td>A unique identifier for each chemical compound. Use it to confirm you have the correct form of a compound from any supplier, regardless of labelling conventions.</td></tr>
+    <tr><td><strong>Dropper flask</strong></td><td>An amber glass bottle with a rubber bulb pipette. Amber glass protects contents from UV degradation.</td></tr>
+    <tr><td><strong>Demineralised water</strong></td><td>Water from which virtually all dissolved minerals have been removed. Your source: 1 µS/cm conductivity, approximately 0.5 mg/L TDS. The blank starting canvas for this system.</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- SECTION 2 -->
+<section id="s2">
+  <h2><span class="section-num">02</span> Why water chemistry matters for coffee</h2>
+  <p>Brewing coffee is the process of dissolving soluble compounds out of ground coffee beans using hot water as the solvent. The dissolved minerals already present in the water are not passive — they actively participate in this extraction process in two distinct ways.</p>
+  <p><strong>Hardness ions (Ca²⁺ and Mg²⁺) are extraction agents.</strong> They bind to aromatic and flavour-active compounds in coffee and pull them into solution. Magnesium is particularly effective at extracting volatile aromatic compounds responsible for clarity, brightness, and floral or fruity character. Calcium contributes more to body, mouthfeel, and sweetness. Water with no minerals at all extracts coffee poorly and produces a flat, hollow-tasting cup.</p>
+  <p><strong>Bicarbonate (HCO₃⁻) is a neutraliser.</strong> It reacts with and neutralises acids. Coffee is naturally acidic. Low bicarbonate water produces a cup that tastes bright and sometimes sharp. High bicarbonate water neutralises that acidity and produces a rounder, flatter cup. Too much bicarbonate produces a chalky or cardboard flavour. Controlling bicarbonate independently of hardness is the key innovation of multi-component water systems like Lotus.</p>
+  <p><strong>Why not just use tap water?</strong> Tap water contains minerals, but in concentrations and ratios you cannot control, which vary by location, season, and source. Starting from demineralised water and adding precise amounts of each mineral gives you complete and reproducible control over what the water does to any given coffee.</p>
+</section>
+
+<!-- SECTION 3 -->
+<section id="s3">
+  <h2><span class="section-num">03</span> Understanding ppm — two different things, same abbreviation</h2>
+  <p>Parts per million (ppm) is a ratio: one part of a substance for every one million parts of total solution. In water chemistry, because water has a density close to 1 g/mL, 1 ppm is numerically equal to 1 mg/L. So far, unambiguous.</p>
+  <p>The ambiguity arises because the coffee and water treatment industries use two different conventions for expressing the same ions.</p>
+
+  <h3>Convention A — actual mg/L</h3>
+  <p>Reports the real mass of each specific ion per litre of water. If you dissolve 4.0 mg of calcium ions (Ca²⁺) in one litre of water, the calcium concentration is 4.0 mg/L actual. This is what a TDS meter approximates.</p>
+
+  <h3>Convention B — ppm as CaCO₃ equivalent</h3>
+  <p>Used in all Lotus, Barista Hustle, and Scott Rao recipes. Converts every ion to the mass of calcium carbonate (CaCO₃) that would contain an equivalent number of electrically charged ions. This enables direct comparison of hardness from calcium, hardness from magnesium, and alkalinity from bicarbonate using a single number, even though these are chemically different ions.</p>
+  <p>The conversion is a fixed multiplication factor for each ion:</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>Ion</th><th>Multiply actual mg/L by</th><th>To get ppm as CaCO₃</th></tr>
+    <tr><td class="ca">Ca²⁺</td><td>× 2.497</td><td>GH contribution</td></tr>
+    <tr><td class="mg">Mg²⁺</td><td>× 4.118</td><td>GH contribution</td></tr>
+    <tr><td><span class="na">Na⁺</span> / <span class="k">K⁺</span> via HCO₃⁻</td><td>× 0.8202 (applied to HCO₃⁻)</td><td>KH contribution</td></tr>
+  </table>
+  </div>
+
+  <div class="note">Example: 4.0 mg/L Ca²⁺ (actual) × 2.497 = 9.99 ppm GH as CaCO₃, reported as approximately 10 ppm GH. This is why Lotus reports that one drop of their calcium solution adds "10 ppm GH" into 450 mL — the actual calcium ion mass delivered is only 1.80 mg, but expressed as CaCO₃ equivalent at 450 mL volume it becomes 10.0 ppm.</div>
+  <p>This manual uses both conventions throughout, always labelled explicitly. When you see a number followed by "(CaCO₃)," it is Convention B. When you see "mg/L actual" or "actual TDS," it is Convention A. Your TDS meter reads approximately Convention A minus 10–20% — see Section 14.</p>
+</section>
+
+<!-- SECTION 4 -->
+<section id="s4">
+  <h2><span class="section-num">04</span> Where the Lotus calibration values come from</h2>
+  <p>The calibration values used throughout this manual are sourced from the <strong>Lotus Water Drops product documentation</strong>, as reproduced and discussed by Scott Rao:</p>
+  <div class="note">Scott Rao, "Lotus Water Drops: How to use them, and a great hack to find the best water for your coffee," published 1 December 2022.<br>
+  <a href="https://www.scottrao.com/blog/lotus-water-drops">scottrao.com/blog/lotus-water-drops</a></div>
+  <p>The Lotus per-drop specification as stated in that source:</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Flask</th><th>Into 450 mL</th><th>Effect</th></tr>
+    <tr><td class="ca">1 drop Ca</td><td>10 ppm GH (CaCO₃)</td><td>Hardness</td></tr>
+    <tr><td class="mg">1 drop Mg</td><td>10 ppm GH (CaCO₃)</td><td>Hardness</td></tr>
+    <tr><td class="na">1 drop Na</td><td>5 ppm KH (CaCO₃)</td><td>Alkalinity</td></tr>
+    <tr><td class="k">1 drop K</td><td>5 ppm KH (CaCO₃)</td><td>Alkalinity</td></tr>
+  </table>
+  </div>
+  <p>These are Lotus product specifications, not independently verified by this author. The 450 mL volume is Lotus's chosen calibration volume because it yields clean round numbers per drop (see Section 11). All stock preparation quantities in Section 8 are calculated to reproduce these exact per-drop deliveries.</p>
+  <p>The water chemistry community has independently reverse-engineered Lotus stock concentrations by working backwards from the published per-drop values. The results are consistent with the calculations in this manual. No single peer-reviewed source exists for this reverse-engineering, but the derivation methodology is transparent and can be verified from first principles using the worked example in Section 8.</p>
+</section>
+
+<!-- SECTION 5 -->
+<section id="s5">
+  <h2><span class="section-num">05</span> What each mineral does in the cup</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Flask</th><th>Compound</th><th>Ions delivered</th><th>Primary flavour effect</th><th>Notes</th></tr>
+    <tr>
+      <td class="ca">Ca</td>
+      <td>CaCl₂·2H₂O</td>
+      <td>Ca²⁺, Cl⁻</td>
+      <td>Body, mouthfeel, sweetness, roundness</td>
+      <td>Ca²⁺ can form limescale if combined with high bicarbonate. Keep below ~50 mg/L Ca²⁺ actual for machine safety.</td>
+    </tr>
+    <tr>
+      <td class="mg">Mg</td>
+      <td>MgCl₂·6H₂O</td>
+      <td>Mg²⁺, Cl⁻</td>
+      <td>Brightness, aromatic clarity, acidity definition</td>
+      <td>Mg²⁺ is the most active extraction agent. Cl⁻ at low concentrations adds subtle sweetness.</td>
+    </tr>
+    <tr>
+      <td class="na">Na</td>
+      <td>NaHCO₃</td>
+      <td>HCO₃⁻, Na⁺</td>
+      <td>Smooth, elegant alkalinity buffer; reduces perceived bitterness</td>
+      <td>Na⁺ counteracts bitterness even at low concentrations. Useful for darker roasts.</td>
+    </tr>
+    <tr>
+      <td class="k">K</td>
+      <td>KHCO₃</td>
+      <td>HCO₃⁻, K⁺</td>
+      <td>Sharp, defined alkalinity buffer; clean finish</td>
+      <td>K⁺ is largely flavour-neutral. Preferred over Na for light roasts where bitterness is not a concern.</td>
+    </tr>
+  </table>
+  </div>
+  <p>Both Na and K flasks deliver HCO₃⁻ (the actual buffering agent) in equal amounts per drop. The difference in their effect is entirely due to the co-delivered cation (Na⁺ vs K⁺). Having both in separate flasks allows you to control not just the total alkalinity, but its character independently.</p>
+</section>
+
+<!-- SECTION 6 -->
+<section id="s6">
+  <h2><span class="section-num">06</span> Resources (Bratislava)</h2>
+
+  <h3>Demineralised source water</h3>
+  <p>Fill customer-supplied containers with demineralised water at approximately 1 µS/cm conductivity.<br>
+  <a href="https://demineralizovanavoda.sk/">demineralizovanavoda.sk</a></p>
+
+  <h3>Dropper flasks (200 mL amber glass)</h3>
+  <p>Amber borosilicate glass bottles with black rubber bulb pipettes, 200 mL volume.<br>
+  <a href="https://bewit.love/sk/produkt/lahvicka-sklenena-hneda-leskla-200-ml-cerna-pipeta">bewit.love — 200 mL amber flask with black pipette</a></p>
+
+  <h3>Lab-grade reagents (p.a. grade)</h3>
+  <p>All four required compounds, 1 kg quantities, p.a. purity. Verify CAS numbers on delivery against the list in Section 7.<br>
+  <a href="https://www.centralchem.sk">centralchem.sk</a></p>
+
+  <h3>TDS / conductivity meter</h3>
+  <p>Any basic conductivity pen meter suffices for consistency checking. The Apera EC20 or HM Digital COM-100 are well-regarded options available on Amazon.de or Alza.sk. Under EUR 20.</p>
+</section>
+
+<!-- SECTION 7 -->
+<section id="s7">
+  <h2><span class="section-num">07</span> Reagents — what you have and why</h2>
+  <p>Four compounds are required. All from Centralchem, p.a. grade, 1 kg each. Confirm the CAS number on delivery — it is the only reliable way to verify you have the correct chemical form, since naming conventions differ between suppliers.</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>Flask</th><th>Chemical name</th><th>Formula</th><th>CAS</th><th>Form</th></tr>
+    <tr><td class="ca">Ca</td><td>Calcium chloride dihydrate</td><td>CaCl₂·2H₂O</td><td>10035-04-8</td><td>White crystalline solid</td></tr>
+    <tr><td class="mg">Mg</td><td>Magnesium chloride hexahydrate</td><td>MgCl₂·6H₂O</td><td>7791-18-6</td><td>White crystalline solid</td></tr>
+    <tr><td class="na">Na</td><td>Sodium bicarbonate</td><td>NaHCO₃</td><td>144-55-8</td><td>Fine white powder</td></tr>
+    <tr><td class="k">K</td><td>Potassium bicarbonate</td><td>KHCO₃</td><td>298-14-6</td><td>White crystalline powder</td></tr>
+  </table>
+  </div>
+
+  <h3>Why these specific forms?</h3>
+  <p>CaCl₂·2H₂O (dihydrate) is the standard food and lab-grade form. The anhydrous (CaCl₂) and hexahydrate (CaCl₂·6H₂O) forms also exist — each has a different mass per formula unit and would require different calculations. The quantities in Section 8 are calculated specifically for the dihydrate.</p>
+  <p>MgCl₂·6H₂O (hexahydrate) is the standard stable form. Anhydrous MgCl₂ is hygroscopic and difficult to weigh accurately. NaHCO₃ and KHCO₃ exist in only one common stable form each — no disambiguation needed.</p>
+
+  <h3>Estimated usage at daily brewing</h3>
+  <p>At typical volumes (200–300 mL per brew, once or twice daily), each 1 kg purchase yields enough compound to make approximately 150 full 200 mL flasks of stock. Each flask contains approximately 4,000 drops. At 10–20 drops per brew session, one flask lasts several months. The 1 kg quantities will last years at home use.</p>
+</section>
+
+<!-- SECTION 8 -->
+<section id="s8">
+  <h2><span class="section-num">08</span> Preparing the four mother stocks</h2>
+
+  <h3>Concept</h3>
+  <p>Each mother stock is a concentrated mineral solution in a 200 mL amber dropper flask. When a small number of drops are added to demineralised brew water, each drop delivers a known, predictable mass of mineral ions. The concentration is set so that the per-drop delivery matches the Lotus product specification exactly.</p>
+  <p>The amber glass protects the solution from UV degradation. The rubber bulb dropper delivers a consistent volume of 0.05 mL per drop (20 drops per mL).</p>
+
+  <div class="warn"><strong>Before you begin:</strong> verify the drop volume of your specific dropper. Draw 1 mL of water into a syringe, then dispense it through the dropper and count the drops. If the count differs significantly from 20, all per-drop mineral deliveries in this manual will be off by a proportional factor and must be rescaled.</div>
+
+  <h3>Why 200 mL improves weighing precision</h3>
+  <p>Each stock is prepared by dissolving a precise mass of compound in exactly 200 mL of source water. A larger preparation volume reduces the relative impact of weighing error. For example, the Na flask requires 15.2 g of NaHCO₃. A ±0.1 g error on a home scale (0.1 g resolution) represents ±0.66% of that mass — well within the 5% acceptable tolerance. The 200 mL volume was chosen to keep all four compounds within this tolerance on a consumer-grade scale.</p>
+
+  <h3>Equipment</h3>
+  <p>Home scale reading to 0.1 g resolution. Four 200 mL amber glass dropper flasks. Glass rod or magnetic stirrer for mixing. Syringe or graduated cylinder for topping up to exact volume. Source water (1 µS/cm demineralised). Permanent marker or adhesive labels.</p>
+
+  <h3>Stock preparation quantities</h3>
+  <p>Calculated to reproduce the Lotus per-drop specification exactly, assuming 0.05 mL per drop.</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>Flask</th><th>Compound</th><th>CAS</th><th>Weigh (g)</th><th>Scale error ±0.1 g</th><th>Stock concentration</th></tr>
+    <tr><td class="ca">Ca</td><td>CaCl₂·2H₂O</td><td>10035-04-8</td><td><strong>26.4 g</strong></td><td>±0.38%</td><td>132.0 g/L</td></tr>
+    <tr><td class="mg">Mg</td><td>MgCl₂·6H₂O</td><td>7791-18-6</td><td><strong>36.4 g</strong></td><td>±0.27%</td><td>182.0 g/L</td></tr>
+    <tr><td class="na">Na</td><td>NaHCO₃</td><td>144-55-8</td><td><strong>15.2 g</strong></td><td>±0.66%</td><td>76.0 g/L</td></tr>
+    <tr><td class="k">K</td><td>KHCO₃</td><td>298-14-6</td><td><strong>18.0 g</strong></td><td>±0.56%</td><td>90.0 g/L</td></tr>
+  </table>
+  </div>
+
+  <h3>Derivation of Ca flask quantity (worked example)</h3>
+  <p>This example shows how the 26.4 g figure is derived. The same method applies to all four flasks.</p>
+
+  <div class="formula">
+Target: 1 drop Ca (0.05 mL) into 450 mL = 10 ppm GH (CaCO₃)
+
+Step 1 — convert to actual Ca²⁺ mass per drop:
+  10 ppm CaCO₃ × (40.08 / 100.09) = 4.003 mg/L Ca²⁺ in 450 mL
+  mass per drop = 4.003 × 0.450 = 1.801 mg Ca²⁺
+
+Step 2 — required stock concentration:
+  1.801 mg / 0.05 mL = 36.02 mg/mL = 36,020 mg/L Ca²⁺
+
+Step 3 — convert to CaCl₂·2H₂O mass:
+  MW of CaCl₂·2H₂O = 40.08 + 70.91 + 36.03 = 147.02 g/mol
+  Ca²⁺ fraction = 40.08 / 147.02 = 0.2726
+  Required CaCl₂·2H₂O = 36,020 / 0.2726 = 132,100 mg/L = 132.1 g/L
+
+Step 4 — scale to 200 mL:
+  132.1 g/L × 0.200 L = 26.42 g  →  weigh 26.4 g
+  </div>
+
+  <h3>Preparation procedure (all four flasks)</h3>
+  <p>1. Label each flask: compound name, formula, CAS number, date prepared.</p>
+  <p>2. Weigh the compound mass specified in the table above.</p>
+  <p>3. Add approximately 170 mL of source water to the flask.</p>
+  <p>4. Add the compound and stir or swirl until fully dissolved. See Section 9 for compound-specific handling notes.</p>
+  <p>5. Once fully dissolved and at room temperature, top up to exactly 200 mL.</p>
+  <p>6. Cap tightly. The stock is ready for use immediately.</p>
+</section>
+
+<!-- SECTION 9 -->
+<section id="s9">
+  <h2><span class="section-num">09</span> Handling and storage</h2>
+
+  <h3>Ca flask (CaCl₂·2H₂O)</h3>
+  <p>Dissolution is strongly exothermic — the solution becomes noticeably warm. Add the compound slowly with stirring and allow the flask to return fully to room temperature before topping to the 200 mL mark. Thermal expansion while warm would result in slightly less than 200 mL after cooling, making the stock slightly more concentrated than intended. <strong>Shelf life: 12+ months sealed.</strong></p>
+
+  <h3>Mg flask (MgCl₂·6H₂O)</h3>
+  <p>Dissolves readily without significant heat. No special handling required. <strong>Shelf life: 12+ months sealed.</strong></p>
+
+  <h3>Na flask (NaHCO₃)</h3>
+  <p>Stir gently — do not shake. Shaking or dissolving in warm water causes CO₂ to be released as visible fizzing, meaning bicarbonate is being lost from solution and the stock will be weaker than intended. Use room temperature source water only. <strong>Remake every 2–3 months.</strong> Degradation is a slow, gradual CO₂ loss that reduces buffering capacity. The stock does not become harmful; it simply becomes weaker.</p>
+
+  <h3>K flask (KHCO₃)</h3>
+  <p>Same precautions as Na flask. Stir gently, no shaking, room temperature water, sealed storage. <strong>Remake every 2–3 months.</strong></p>
+
+  <div class="warn"><strong>Never combine Ca stock with either bicarbonate stock directly.</strong> Calcium ions (Ca²⁺) and bicarbonate ions (HCO₃⁻) react at high concentrations to form calcium carbonate (CaCO₃) — insoluble in water — as visible white precipitation. Always add each stock separately to the full volume of brew water, where dilution keeps all ions in solution.</div>
+</section>
+
+<!-- SECTION 10 -->
+<section id="s10">
+  <h2><span class="section-num">10</span> Reference recipes</h2>
+
+  <h3>Per-drop delivery values</h3>
+  <p>Each drop (0.05 mL) delivers the following, independent of water volume:</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>Flask</th><th>Target ion</th><th>mg/drop</th><th>Counter-ion</th><th>mg/drop</th><th>Total mg/drop</th><th>CaCO₃ equiv/drop</th></tr>
+    <tr><td class="ca">Ca</td><td>Ca²⁺</td><td>1.801</td><td>Cl⁻</td><td>3.187</td><td>4.988</td><td>4.500 mg GH</td></tr>
+    <tr><td class="mg">Mg</td><td>Mg²⁺</td><td>1.093</td><td>Cl⁻</td><td>3.189</td><td>4.282</td><td>4.500 mg GH</td></tr>
+    <tr><td class="na">Na</td><td>HCO₃⁻</td><td>2.744</td><td>Na⁺</td><td>1.034</td><td>3.778</td><td>2.250 mg KH</td></tr>
+    <tr><td class="k">K</td><td>HCO₃⁻</td><td>2.744</td><td>K⁺</td><td>1.758</td><td>4.502</td><td>2.250 mg KH</td></tr>
+  </table>
+  </div>
+
+  <div class="note"><strong>Key symmetry:</strong> Ca and Mg contribute identical GH per drop. Na and K contribute identical KH per drop. GH is set entirely by (Ca + Mg) drops; KH by (Na + K) drops. The split within each pair is a flavour decision, not a chemistry one.</div>
+
+  <h3>Formulae</h3>
+  <div class="formula">
+GH (ppm CaCO₃) = 4.500 × (Ca drops + Mg drops) / volume in litres
+KH (ppm CaCO₃) = 2.250 × (Na drops + K drops) / volume in litres
+Actual TDS (mg/L) = [Ca×4.988 + Mg×4.282 + Na×3.778 + K×4.502] / volume in litres
+  </div>
+
+  <h3>Scaling to your brew volume</h3>
+  <p>The recipes below are given per 1 litre. To use at a smaller volume, scale drop counts proportionally:</p>
+  <div class="formula">drops at your volume = drops per litre × (your volume mL / 1000)</div>
+  <p>Rounding is unavoidable at small volumes. Record your actual drop counts and recalculate with the formulae above to know exactly what you made.</p>
+
+  <!-- Recipe A -->
+  <h3>Recipe A — Rao / Perger</h3>
+  <p>Credited to Dan Eils (Litmus Coffee Labs). Source: <a href="https://www.scottrao.com/blog/lotus-water-drops">Scott Rao blog, 1 Dec 2022</a>. Balanced, full-bodied, suitable for most single-origin filter coffees.</p>
+
+  <div class="recipe">
+    <div class="recipe-meta">
+      <span>Target: <span class="val">90 GH / 42 KH</span> (ppm CaCO₃)</span>
+      <span>Per: <span class="val">1 litre</span> demineralised water</span>
+      <span class="tag">All four flasks</span>
+    </div>
+    <div class="drop-grid">
+      <div class="drop-cell"><span class="n ca">7</span><span class="label">Ca drops</span></div>
+      <div class="drop-cell"><span class="n mg">13</span><span class="label">Mg drops</span></div>
+      <div class="drop-cell"><span class="n na">8</span><span class="label">Na drops</span></div>
+      <div class="drop-cell"><span class="n k">11</span><span class="label">K drops</span></div>
+    </div>
+    <div class="recipe-stats">
+      GH = 4.500 × 20 = <span class="val">90.0 ppm CaCO₃</span><br>
+      KH = 2.250 × 19 = <span class="val">42.75 ppm CaCO₃</span><br>
+      Actual TDS = <span class="val">170.3 mg/L</span><br>
+      Ion breakdown: Ca²⁺ 12.6 / Mg²⁺ 14.2 / Cl⁻ 63.8 / HCO₃⁻ 52.3 / Na⁺ 8.3 / K⁺ 19.3 mg/L
+    </div>
+  </div>
+
+  <!-- Recipe B -->
+  <h3>Recipe B — Hedrick Light and Bright</h3>
+  <p>Credited to Lance Hedrick. Source: <a href="https://www.scottrao.com/blog/lotus-water-drops">Scott Rao blog, 1 Dec 2022</a>. Bright, acidity-forward. Best on delicate washed single-origins. Two flasks only.</p>
+
+  <div class="recipe">
+    <div class="recipe-meta">
+      <span>Target: <span class="val">60 GH / 25 KH</span> (ppm CaCO₃)</span>
+      <span>Per: <span class="val">1 litre</span> demineralised water</span>
+      <span class="tag">Ca + K only</span>
+    </div>
+    <div class="drop-grid">
+      <div class="drop-cell"><span class="n ca">13</span><span class="label">Ca drops</span></div>
+      <div class="drop-cell skip"><span class="n">—</span><span class="label">Mg (skip)</span></div>
+      <div class="drop-cell skip"><span class="n">—</span><span class="label">Na (skip)</span></div>
+      <div class="drop-cell"><span class="n k">11</span><span class="label">K drops</span></div>
+    </div>
+    <div class="recipe-stats">
+      GH = 4.500 × 13 = <span class="val">58.5 ppm CaCO₃</span><br>
+      KH = 2.250 × 11 = <span class="val">24.75 ppm CaCO₃</span><br>
+      Actual TDS = <span class="val">114.4 mg/L</span><br>
+      Ion breakdown: Ca²⁺ 23.4 / Cl⁻ 41.4 / HCO₃⁻ 30.2 / K⁺ 19.3 mg/L
+    </div>
+  </div>
+
+  <!-- Recipe C -->
+  <h3>Recipe C — Symmetric baseline</h3>
+  <p>Derived in this manual. Not a published standard. Equal drops from all four flasks — easy to remember, balanced, machine-safe. A useful first experimental starting point.</p>
+
+  <div class="recipe">
+    <div class="recipe-meta">
+      <span>Target: <span class="val">81 GH / 40.5 KH</span> (ppm CaCO₃)</span>
+      <span>Per: <span class="val">1 litre</span> demineralised water</span>
+      <span class="tag">All four flasks, equal</span>
+    </div>
+    <div class="drop-grid">
+      <div class="drop-cell"><span class="n ca">9</span><span class="label">Ca drops</span></div>
+      <div class="drop-cell"><span class="n mg">9</span><span class="label">Mg drops</span></div>
+      <div class="drop-cell"><span class="n na">9</span><span class="label">Na drops</span></div>
+      <div class="drop-cell"><span class="n k">9</span><span class="label">K drops</span></div>
+    </div>
+    <div class="recipe-stats">
+      GH = 4.500 × 18 = <span class="val">81.0 ppm CaCO₃</span><br>
+      KH = 2.250 × 18 = <span class="val">40.5 ppm CaCO₃</span><br>
+      Actual TDS = <span class="val">158.0 mg/L</span><br>
+      Ion breakdown: Ca²⁺ 16.2 / Mg²⁺ 9.8 / Cl⁻ 57.8 / HCO₃⁻ 49.4 / Na⁺ 9.3 / K⁺ 15.8 mg/L
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <h3>Recipe summary</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Recipe</th><th>GH (CaCO₃)</th><th>KH (CaCO₃)</th><th>Actual TDS at 1 L</th><th>Flasks</th><th>Source</th></tr>
+    <tr><td>Rao/Perger</td><td>90.0</td><td>42.75</td><td>170.3 mg/L</td><td>All four</td><td>Scott Rao / Dan Eils</td></tr>
+    <tr><td>Hedrick L&amp;B</td><td>58.5</td><td>24.75</td><td>114.4 mg/L</td><td>Ca + K</td><td>Lance Hedrick</td></tr>
+    <tr><td>Symmetric</td><td>81.0</td><td>40.5</td><td>158.0 mg/L</td><td>All four</td><td>Derived</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- SECTION 11 -->
+<section id="s11">
+  <h2><span class="section-num">11</span> Table 1 — GH and KH per drop at 20 water volumes</h2>
+  <p>Ca and Mg contribute identically to GH per drop. Na and K contribute identically to KH per drop. Values in ppm as CaCO₃.</p>
+  <p><strong>How to use:</strong> find your brew volume row. Multiply the GH column by your total (Ca + Mg) drops, and the KH column by your total (Na + K) drops, to get your water profile.</p>
+
+  <div class="legend">
+    <span class="legend-item lotus">Lotus calibration volume</span>
+    <span class="legend-item brew">Typical home brew range</span>
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>Volume (mL)</th><th>GH per drop — Ca or Mg (ppm CaCO₃)</th><th>KH per drop — Na or K (ppm CaCO₃)</th></tr>
+    <tr class="brew"><td>50</td><td>90.0</td><td>45.0</td></tr>
+    <tr class="brew"><td>100</td><td>45.0</td><td>22.5</td></tr>
+    <tr class="brew"><td>150</td><td>30.0</td><td>15.0</td></tr>
+    <tr class="brew"><td>200</td><td>22.5</td><td>11.3</td></tr>
+    <tr class="brew"><td>250</td><td>18.0</td><td>9.0</td></tr>
+    <tr class="brew"><td>300</td><td>15.0</td><td>7.5</td></tr>
+    <tr><td>350</td><td>12.9</td><td>6.4</td></tr>
+    <tr><td>400</td><td>11.3</td><td>5.6</td></tr>
+    <tr class="lotus"><td>450</td><td>10.0</td><td>5.0</td></tr>
+    <tr><td>500</td><td>9.0</td><td>4.5</td></tr>
+    <tr><td>550</td><td>8.2</td><td>4.1</td></tr>
+    <tr><td>600</td><td>7.5</td><td>3.8</td></tr>
+    <tr><td>650</td><td>6.9</td><td>3.5</td></tr>
+    <tr><td>700</td><td>6.4</td><td>3.2</td></tr>
+    <tr><td>750</td><td>6.0</td><td>3.0</td></tr>
+    <tr><td>800</td><td>5.6</td><td>2.8</td></tr>
+    <tr><td>850</td><td>5.3</td><td>2.6</td></tr>
+    <tr><td>900</td><td>5.0</td><td>2.5</td></tr>
+    <tr><td>950</td><td>4.7</td><td>2.4</td></tr>
+    <tr><td>1000</td><td>4.5</td><td>2.3</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- SECTION 12 -->
+<section id="s12">
+  <h2><span class="section-num">12</span> Table 2 — Actual TDS per drop at 20 water volumes</h2>
+  <p>Values in actual mg/L (not CaCO₃ equivalent). Use these to estimate your TDS meter reading after adding drops, accounting for the meter offset described in Section 14.</p>
+  <p class="small">Derivation: Ca = 4,988 ÷ V(mL). Mg = 4,282 ÷ V(mL). Na = 3,778 ÷ V(mL). K = 4,502 ÷ V(mL).</p>
+
+  <div class="legend">
+    <span class="legend-item lotus">Lotus calibration volume</span>
+    <span class="legend-item brew">Typical home brew range</span>
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <tr>
+      <th>Volume (mL)</th>
+      <th class="ca">Ca flask (mg/L per drop)</th>
+      <th class="mg">Mg flask (mg/L per drop)</th>
+      <th class="na">Na flask (mg/L per drop)</th>
+      <th class="k">K flask (mg/L per drop)</th>
+    </tr>
+    <tr class="brew"><td>50</td><td>99.8</td><td>85.6</td><td>75.6</td><td>90.0</td></tr>
+    <tr class="brew"><td>100</td><td>49.9</td><td>42.8</td><td>37.8</td><td>45.0</td></tr>
+    <tr class="brew"><td>150</td><td>33.3</td><td>28.5</td><td>25.2</td><td>30.0</td></tr>
+    <tr class="brew"><td>200</td><td>24.9</td><td>21.4</td><td>18.9</td><td>22.5</td></tr>
+    <tr class="brew"><td>250</td><td>20.0</td><td>17.1</td><td>15.1</td><td>18.0</td></tr>
+    <tr class="brew"><td>300</td><td>16.6</td><td>14.3</td><td>12.6</td><td>15.0</td></tr>
+    <tr><td>350</td><td>14.3</td><td>12.2</td><td>10.8</td><td>12.9</td></tr>
+    <tr><td>400</td><td>12.5</td><td>10.7</td><td>9.4</td><td>11.3</td></tr>
+    <tr class="lotus"><td>450</td><td>11.1</td><td>9.5</td><td>8.4</td><td>10.0</td></tr>
+    <tr><td>500</td><td>10.0</td><td>8.6</td><td>7.6</td><td>9.0</td></tr>
+    <tr><td>550</td><td>9.1</td><td>7.8</td><td>6.9</td><td>8.2</td></tr>
+    <tr><td>600</td><td>8.3</td><td>7.1</td><td>6.3</td><td>7.5</td></tr>
+    <tr><td>650</td><td>7.7</td><td>6.6</td><td>5.8</td><td>6.9</td></tr>
+    <tr><td>700</td><td>7.1</td><td>6.1</td><td>5.4</td><td>6.4</td></tr>
+    <tr><td>750</td><td>6.7</td><td>5.7</td><td>5.0</td><td>6.0</td></tr>
+    <tr><td>800</td><td>6.2</td><td>5.4</td><td>4.7</td><td>5.6</td></tr>
+    <tr><td>850</td><td>5.9</td><td>5.0</td><td>4.4</td><td>5.3</td></tr>
+    <tr><td>900</td><td>5.5</td><td>4.8</td><td>4.2</td><td>5.0</td></tr>
+    <tr><td>950</td><td>5.3</td><td>4.5</td><td>4.0</td><td>4.7</td></tr>
+    <tr><td>1000</td><td>5.0</td><td>4.3</td><td>3.8</td><td>4.5</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- SECTION 13 -->
+<section id="s13">
+  <h2><span class="section-num">13</span> Table 3 — Minimum water volume for each TDS target (10–200 mg/L)</h2>
+  <p>Each recipe has a fixed ratio of drops and therefore a fixed total dissolved mass per "one set." The minimum water volume to hit a TDS target without rounding any drops:</p>
+  <div class="formula">Volume (mL) = (mass per 1-set in mg) / (target TDS in mg/L) × 1000</div>
+  <p>Mass per 1-set: Rao/Perger = 170.3 mg. Hedrick L&amp;B = 114.4 mg. Symmetric = 158.0 mg.</p>
+
+  <div class="legend">
+    <span class="legend-item lotus">Rao/Perger natural 1 L point</span>
+    <span class="legend-item brew">Hedrick natural 1 L point</span>
+    <span class="legend-item natural">Symmetric natural 1 L point</span>
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <tr>
+      <th>Target TDS (mg/L)</th>
+      <th>GH approx. (CaCO₃, Rao/Perger)</th>
+      <th>Rao/Perger volume</th>
+      <th>Hedrick L&amp;B volume</th>
+      <th>Symmetric volume</th>
+    </tr>
+    <tr><td>10</td><td>~5</td><td>17,030 mL (17.0 L)</td><td>11,440 mL (11.4 L)</td><td>15,800 mL (15.8 L)</td></tr>
+    <tr><td>20</td><td>~11</td><td>8,515 mL (8.5 L)</td><td>5,720 mL (5.7 L)</td><td>7,900 mL (7.9 L)</td></tr>
+    <tr><td>30</td><td>~16</td><td>5,677 mL (5.7 L)</td><td>3,813 mL (3.8 L)</td><td>5,267 mL (5.3 L)</td></tr>
+    <tr><td>40</td><td>~21</td><td>4,258 mL (4.3 L)</td><td>2,860 mL (2.9 L)</td><td>3,950 mL (4.0 L)</td></tr>
+    <tr><td>50</td><td>~27</td><td>3,406 mL (3.4 L)</td><td>2,288 mL (2.3 L)</td><td>3,160 mL (3.2 L)</td></tr>
+    <tr><td>60</td><td>~32</td><td>2,838 mL (2.8 L)</td><td>1,907 mL (1.9 L)</td><td>2,633 mL (2.6 L)</td></tr>
+    <tr><td>70</td><td>~38</td><td>2,433 mL (2.4 L)</td><td>1,634 mL (1.6 L)</td><td>2,257 mL (2.3 L)</td></tr>
+    <tr><td>80</td><td>~43</td><td>2,129 mL (2.1 L)</td><td>1,430 mL (1.4 L)</td><td>1,975 mL (2.0 L)</td></tr>
+    <tr><td>90</td><td>~48</td><td>1,892 mL (1.9 L)</td><td>1,271 mL (1.3 L)</td><td>1,756 mL (1.8 L)</td></tr>
+    <tr><td>100</td><td>~54</td><td>1,703 mL (1.7 L)</td><td>1,144 mL (1.1 L)</td><td>1,580 mL (1.6 L)</td></tr>
+    <tr><td>110</td><td>~59</td><td>1,548 mL (1.5 L)</td><td>1,040 mL (1.0 L)</td><td>1,436 mL (1.4 L)</td></tr>
+    <tr><td>120</td><td>~65</td><td>1,419 mL (1.4 L)</td><td>953 mL</td><td>1,317 mL (1.3 L)</td></tr>
+    <tr><td>130</td><td>~70</td><td>1,310 mL (1.3 L)</td><td>880 mL</td><td>1,215 mL (1.2 L)</td></tr>
+    <tr><td>140</td><td>~75</td><td>1,216 mL (1.2 L)</td><td>817 mL</td><td>1,129 mL (1.1 L)</td></tr>
+    <tr><td>150</td><td>~81</td><td>1,135 mL (1.1 L)</td><td>763 mL</td><td>1,053 mL (1.1 L)</td></tr>
+    <tr><td>160</td><td>~86</td><td>1,064 mL (1.1 L)</td><td>715 mL</td><td>988 mL</td></tr>
+    <tr class="natural"><td>158</td><td>~85</td><td>1,077 mL</td><td>724 mL</td><td>1,000 mL</td></tr>
+    <tr class="lotus"><td>170</td><td>~92</td><td>1,001 mL</td><td>673 mL</td><td>929 mL</td></tr>
+    <tr><td>180</td><td>~97</td><td>946 mL</td><td>636 mL</td><td>878 mL</td></tr>
+    <tr><td>190</td><td>~102</td><td>896 mL</td><td>602 mL</td><td>832 mL</td></tr>
+    <tr><td>200</td><td>~108</td><td>852 mL</td><td>572 mL</td><td>790 mL</td></tr>
+  </table>
+  </div>
+
+  <div class="note">Targets below ~100 mg/L actual TDS are impractical at typical brew volumes (200–300 mL) because the minimum water volume required to preserve the exact drop ratio exceeds what you would brew. At these low targets, either dilute working flasks made from the mother stocks are needed, or simply accept that single-drop adjustments will represent larger concentration steps than ideal.</div>
+</section>
+
+<!-- SECTION 14 -->
+<section id="s14">
+  <h2><span class="section-num">14</span> Using your TDS meter as a consistency check</h2>
+  <p>A TDS pen meter does not directly measure dissolved solids. It measures electrical conductivity and converts it to an estimated TDS using a fixed factor (typically 0.5 or 0.7) calibrated for NaCl solutions. Coffee mineralisation water contains a different ion mixture than NaCl, so the meter will underestimate actual TDS by approximately 10–20%.</p>
+  <p><strong>Use the meter for consistency, not absolute accuracy.</strong> If your Rao/Perger recipe at 1 litre calculates to 170.3 mg/L actual TDS, your meter might read 140–155 ppm. This reading alone is not meaningful in absolute terms. What is meaningful: if you make the same recipe twice and both times the meter reads the same value, your stocks are consistent. If the reading drifts significantly over weeks, your bicarbonate stock may be degrading and should be remade.</p>
+  <p><strong>Calibration check after preparing your stocks:</strong> make 1 litre of Rao/Perger (7 Ca + 13 Mg + 8 Na + 11 K) and measure TDS immediately. Record this reading. It becomes your personal reference baseline for this batch of stocks. All future readings from the same stocks should be interpreted relative to this number.</p>
+</section>
+
+<footer class="doc-footer">
+  Document version 2.
+  Source water: 1 µS/cm (~0.5 mg/L TDS), <a href="https://demineralizovanavoda.sk/">demineralizovanavoda.sk</a>, Bratislava.<br>
+  Drop volume assumed: 0.05 mL (20 drops/mL) — verify for your specific dropper before first use.<br>
+  Recipes sourced from Scott Rao, <a href="https://www.scottrao.com/blog/lotus-water-drops">scottrao.com/blog/lotus-water-drops</a>, 1 December 2022, unless noted otherwise.<br>
+  <a href="https://jamescrollsociety.org">James Croll Society</a> — Bratislava
+</footer>
+
+</body>
+</html>
