@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>3D ASCII nebula</title>
     <style>
         body {
@@ -18,6 +19,8 @@
         canvas {
             background: black;
             image-rendering: pixelated;
+            max-width: 100%;
+            height: auto;
         }
         .controls {
             display: flex;
@@ -75,6 +78,7 @@
     </style>
 </head>
 <body>
+    <center style="font-family: serif; font-size: 15px; line-height: 1.4; color: red; padding: 12px 0 8px;"><font size="2" style="font-size: 15px;"><a href="index.html" style="color: red; padding: 12px 4px; margin: 0 -4px;">home</a> / <a href="fun-stuff.html" style="color: red; padding: 12px 4px; margin: 0 -4px;">fun stuff</a> / ascii animation tool</font></center>
     <canvas id="canvas" width="600" height="600"></canvas>
     
     <div class="controls">

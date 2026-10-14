@@ -1,7 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>James Croll Society</title>
+    <style><!--
+        .crumbs { line-height: 1.4; padding-top: 4px; }
+        .crumbs font { font-size: 15px; }
+        .search { position: relative; width: 22em; max-width: 100%; margin: 28px auto 0; font-family: serif; font-size: 20px; }
+        .search input {
+            box-sizing: border-box; width: 100%; margin: 0; padding: 0.3em 0.5em;
+            font: inherit; color: red; background: black;
+            border: 1px solid red; border-radius: 0; outline: none;
+            -webkit-appearance: none; appearance: none;
+        }
+        .search input::placeholder { color: red; opacity: 0.5; }
+        .search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+        .search-results {
+            position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+            max-height: 60vh; overflow-y: auto; text-align: left;
+            background: black; border: 1px solid red; border-top: 0;
+        }
+        .search-results a { display: block; padding: 0.3em 0.5em; color: red; }
+        .search-results a.active, .search-results a:hover { background: red; color: black; }
+        .search-trail { margin-left: 0.5em; font-size: 14px; }
+        a:focus-visible, .search input:focus-visible { outline: 1px solid red; outline-offset: 2px; }
+        .search-none { padding: 0.3em 0.5em; font-size: 15px; }
+    --></style>
 </head>
 
 <body
@@ -11,6 +36,8 @@
     vlink="red"
     alink="red"
 >
+
+    <center class="crumbs"><font size="2">home</font></center>
 
     <h1>
         <center>James Croll Society</center>
@@ -26,29 +53,33 @@
         </center>
     </p>
 
+    <div id="search"></div>
+
     <center>
         <font size="5">
-            <a href="/flavorWheel.html">
-                <br>SCA's flavor wheel
+            <a href="blog.html">
+                <br>Blog
             </a>
 
-            <a href="/coffeeWater.html">
-                <br>Notes on cheap high quality brewing water preparation
+            <a href="coffee.html">
+                <br>Coffee
             </a>
 
-            <a href="/animation.html">
-                <br>Cool ASCII animation tool
+            <a href="essays.html">
+                <br>Essays
             </a>
 
-            <a href="https://oblecko.zatisie.workers.dev">
-                <br>Oblecko - Wardrobe management app
+            <a href="fun-stuff.html">
+                <br>Fun stuff
             </a>
 
-            <a href="/oblecko-demo.html">
-                <br>Oblecko - Wardrobe management app demo (password: demo)
+            <a href="projects.html">
+                <br>Projects
             </a>
         </font>
     </center>
 
+    <script src="search-index.js"></script>
+    <script src="search.js"></script>
 </body>
 </html>
